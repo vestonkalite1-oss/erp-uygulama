@@ -1,0 +1,2391 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B5ED7">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ERP">
+<title>ERP — Entegre Yönetim Sistemi</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', Arial, sans-serif; background: #F2F4F7; color: #1F2937; }
+  #app { display: flex; min-height: 100vh; }
+
+  .sidebar { width: 240px; background: #ffffff; border-right: 1px solid #E3E7EC; padding: 0; flex-shrink: 0; overflow-y: auto; }
+  .sidebar .brand { padding: 18px 20px; border-bottom: 1px solid #E3E7EC; display: flex; align-items: center; gap: 10px; }
+  .sidebar .brand .logo { width: 34px; height: 34px; border-radius: 7px; background: #0B5ED7; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; }
+  .sidebar .brand .title { font-size: 15px; font-weight: 700; color: #1F2937; line-height: 1.2; }
+  .sidebar .brand .sub { font-size: 11px; color: #8A93A3; margin-top: 1px; }
+
+  .navsection { padding: 14px 10px 4px; }
+  .navsection-label { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: #9AA3B2; font-weight: 700; padding: 4px 10px 8px; }
+  .navbtn { display: flex; align-items: center; gap: 10px; width: 100%; background: transparent; color: #45505F; border: none; border-radius: 7px; padding: 9px 12px; margin-bottom: 2px; font-size: 13.5px; font-weight: 500; cursor: pointer; text-align: left; font-family: inherit; }
+  .navbtn.active { background: #EAF2FE; color: #0B5ED7; font-weight: 700; }
+  .navbtn:hover:not(.active) { background: #F5F7FA; }
+  .navbtn .ic { width: 18px; text-align: center; font-size: 14px; }
+
+  .topbar { height: 56px; background: #fff; border-bottom: 1px solid #E3E7EC; display: flex; align-items: center; justify-content: space-between; padding: 0 26px; position: sticky; top: 0; z-index: 5; }
+  .breadcrumb { font-size: 13px; color: #8A93A3; }
+  .breadcrumb b { color: #1F2937; font-weight: 600; }
+  .topbar-right { display: flex; align-items: center; gap: 14px; font-size: 13px; color: #45505F; }
+  .synctag { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #1E8E5A; font-weight: 600; }
+  .synctag .dot { width: 7px; height: 7px; border-radius: 50%; background: #1E8E5A; }
+  .synctag.saving { color: #C79A3D; }
+  .synctag.saving .dot { background: #C79A3D; }
+
+  .main-wrap { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .main { flex: 1; padding: 22px 28px 40px; overflow-y: auto; }
+
+  .eyebrow { font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: #8A93A3; font-weight: 700; }
+  h2.pagetitle { font-size: 22px; font-weight: 700; margin: 3px 0 14px; color: #1F2937; }
+  .divider-line { height: 1px; background: #E3E7EC; margin: 6px 0 14px; }
+  .headrow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 10px; }
+
+  .subtabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 18px; border-bottom: 1px solid #E3E7EC; padding-bottom: 12px; }
+  .subtab { background: #F5F7FA; border: 1px solid #E3E7EC; color: #45505F; border-radius: 7px; padding: 7px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .subtab.active { background: #0B5ED7; color: #fff; border-color: #0B5ED7; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; border: none; border-radius: 7px; padding: 9px 16px; font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: inherit; color: #fff; }
+  .btn-primary { background: #0B5ED7; }
+  .btn-dark { background: #45505F; }
+  .btn-plain { background: none; border: none; cursor: pointer; color: #C0392B; padding: 4px; }
+  .btn[disabled] { opacity: .55; cursor: default; }
+
+  .form-card { background: #FAFBFC; border: 1px solid #E3E7EC; border-radius: 10px; padding: 18px; margin: 16px 0 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+  .form-card label { display: flex; flex-direction: column; font-size: 12.5px; color: #45505F; font-weight: 600; }
+  .form-card input, .form-card select { margin-top: 5px; padding: 7px 9px; border-radius: 6px; border: 1px solid #D7DCE3; font-size: 13.5px; background: #fff; color: #1F2937; font-family: inherit; }
+  .form-card input.mono { font-family: 'IBM Plex Mono', monospace; }
+  .form-actions { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; }
+  .error-msg { color: #C0392B; font-size: 13px; }
+
+  .table-card { background: #fff; border: 1px solid #E3E7EC; border-radius: 10px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead tr { background: #F5F7FA; text-align: left; }
+  th { padding: 10px 14px; font-weight: 700; color: #45505F; white-space: nowrap; }
+  td { padding: 9px 14px; white-space: nowrap; color: #1F2937; border-top: 1px solid #EEF1F4; }
+  .empty-row td { text-align: center; color: #9AA3B2; padding: 24px; }
+  tr.clickrow { cursor: pointer; }
+  tr.clickrow:hover { background: #F5F9FF; }
+
+  .stamp { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: #0B5ED7; background: #EAF2FE; border-radius: 4px; padding: 2px 8px; display: inline-block; letter-spacing: 0.3px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #fff; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 26px; }
+  .kpi-card { background: #fff; border: 1px solid #E3E7EC; border-radius: 10px; padding: 16px 18px; border-left: 4px solid #0B5ED7; }
+  .kpi-label { font-size: 12px; color: #8A93A3; font-weight: 600; margin-bottom: 6px; }
+  .kpi-value { font-size: 28px; font-weight: 700; color: #1F2937; }
+  .kpi-sub { font-size: 11.5px; color: #9AA3B2; margin-top: 4px; }
+
+  .chart-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .chart-card { background: #fff; border: 1px solid #E3E7EC; border-radius: 10px; padding: 18px; }
+  .chart-title { font-weight: 700; font-size: 13.5px; margin-bottom: 12px; color: #1F2937; }
+  .bar-row { display: flex; align-items: flex-end; gap: 8px; height: 190px; }
+  .bar-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; height: 100%; }
+  .bar { width: 100%; max-width: 30px; border-radius: 4px 4px 0 0; }
+  .bar-label { font-size: 11px; color: #8A93A3; margin-top: 6px; }
+  .bar-value { font-size: 11px; color: #1F2937; font-weight: 600; }
+  .donut-wrap { display: flex; align-items: center; gap: 20px; }
+  .donut { width: 130px; height: 130px; border-radius: 50%; flex-shrink: 0; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .analiz-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .rank-list { list-style: none; margin: 0; padding: 0; }
+  .rank-list li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #EEF1F4; font-size: 13.5px; }
+  .rank-list li:last-child { border-bottom: none; }
+  .rank-list .n { color: #8A93A3; }
+
+  .footnote { margin-top: 18px; font-size: 12px; color: #9AA3B2; }
+  .loading-box { padding: 60px 0; text-align: center; color: #8A93A3; font-size: 13.5px; }
+
+  /* Etiket yazdır (100x70 mm) */
+  .etk-wrap { display: grid; grid-template-columns: 360px 1fr; gap: 18px; align-items: start; }
+  @media (max-width: 1000px) { .etk-wrap { grid-template-columns: 1fr; } }
+  .etk-prev { background: #fff; border: 1px dashed #9AA3B2; padding: 10px; overflow: auto; }
+  .etk-prev .etiket { box-shadow: 0 0 0 1px #CBD2DC; }
+  .etiket { width: 100mm; height: 70mm; box-sizing: border-box; padding: 4mm; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; display: flex; flex-direction: column; overflow: hidden; }
+  .e-kod { font-weight: 700; line-height: 1; white-space: nowrap; }
+  .e-acik { font-size: 4.2mm; font-weight: 700; line-height: 1.15; height: 9mm; margin-top: 1.5mm; overflow: hidden; }
+  .e-raf { display: flex; align-items: center; gap: 3mm; border: 0.5mm solid #000; padding: 0.3mm 2mm; margin: 0.5mm 0 1.5mm; align-self: flex-start; }
+  .e-rl { font-size: 3.2mm; } .e-rv { font-size: 7mm; font-weight: 700; }
+  .e-bar { text-align: center; height: 15mm; } .e-bar svg { display: block; margin: 0 auto; }
+  .e-bt { text-align: center; font-size: 3.4mm; letter-spacing: .3mm; margin-top: .5mm; }
+  .e-foot { margin-top: auto; display: flex; justify-content: space-between; font-size: 3.6mm; border-top: 0.3mm solid #000; padding-top: 1mm; }
+  #print-area { display: none; }
+  @page { size: 100mm 70mm; margin: 0; }
+  @media print {
+    html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+    body > *:not(#print-area) { display: none !important; }
+    #print-area { display: block !important; }
+    #print-area .etiket { height: 69mm; break-after: page; page-break-after: always; }
+    #print-area .etiket:last-child { break-after: auto; page-break-after: auto; }
+  }
+  .term-cam { width: 100%; margin-top: 8px; padding: 14px; font-size: 17px; font-weight: 700; background: #111827; color: #fff; border: none; border-radius: 10px; cursor: pointer; }
+  .e-urun .u-ust { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 0.5mm solid #000; padding-bottom: 1mm; }
+  .u-marka { font-size: 9mm; font-weight: 700; letter-spacing: .3mm; } .u-kod { font-weight: 700; line-height: 1; white-space: nowrap; }
+  .u-satir { display: flex; justify-content: space-between; font-size: 4.6mm; margin-top: 2mm; } .u-satir b { font-size: 5.4mm; }
+  .u-adet { text-align: center; font-size: 9mm; font-weight: 700; margin: 2.5mm 0 1mm; }
+  .term-modes { flex-wrap: wrap; } .term-mode { flex: 1 1 22%; font-size: 14px; padding: 12px 4px; }
+  .durum-chips { display: flex; gap: 6px; margin: 2px 0 8px; }
+  .durum-chip { flex: 1; padding: 10px 2px; font-size: 13.5px; font-weight: 700; border: 2px solid var(--c); background: #fff; color: var(--c); border-radius: 8px; cursor: pointer; }
+  .durum-chip.on { background: var(--c); color: #fff; }
+  .dsum { display: flex; gap: 8px; padding: 8px 10px; border-bottom: 1px solid #E3E7EC; background: #FAFBFC; flex-wrap: wrap; }
+  .dsum span { padding: 4px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 700; }
+  .dz.uyg b { color: #1E7A4D; } .dz.bek b { color: #9A6200; } .dz.ret b { color: #B02A1E; }
+  .erp-table tr.satir-ret { background: #FFF5F5 !important; }
+  body.rol-kisitli #toggle-form, body.rol-kisitli [data-del] { display: none !important; }
+  /* El Terminali */
+  .term-wrap { display: grid; grid-template-columns: 400px 1fr; gap: 18px; align-items: start; }
+  .term-right { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .erp-panel { background: #fff; border: 1px solid #D5DBE3; border-radius: 6px; overflow: hidden; }
+  .erp-ptitle { display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; background: #E9EEF5; border-bottom: 1px solid #D5DBE3; font-size: 13px; font-weight: 700; color: #2B3A52; }
+  .erp-ptitle span { font-weight: 500; color: #6B7482; }
+  .erp-filter { display: flex; gap: 6px; padding: 8px 10px; border-bottom: 1px solid #E3E7EC; background: #FAFBFC; flex-wrap: wrap; }
+  .erp-filter input, .erp-filter select { padding: 6px 8px; font-size: 13px; border: 1px solid #CBD2DC; border-radius: 6px; background: #fff; min-width: 0; }
+  .erp-filter input { flex: 1 1 140px; }
+  .term-backup { margin-top: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .term-chk { font-weight: 500; font-size: 12px; color: #45505F; cursor: pointer; }
+  .erp-scroll { max-height: 300px; overflow: auto; }
+  .erp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .erp-table th { position: sticky; top: 0; background: #F5F7FA; text-align: left; padding: 7px 10px; font-size: 11.5px; text-transform: uppercase; letter-spacing: .03em; color: #6B7482; border-bottom: 1px solid #D5DBE3; }
+  .erp-table td { padding: 7px 10px; border-bottom: 1px solid #EEF1F5; }
+  .erp-table tbody tr:nth-child(even) { background: #FAFBFC; }
+  .erp-table tr.pick { cursor: pointer; }
+  .erp-table tr.pick:hover { background: #EAF2FE; }
+  .erp-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .erp-table td.act { text-align: right; white-space: nowrap; }
+  @media (max-width: 1000px) { .term-wrap { grid-template-columns: 1fr; } }
+  .term-modes { display: flex; gap: 8px; margin-bottom: 14px; }
+  .term-mode { flex: 1; padding: 14px 6px; font-size: 16px; font-weight: 700; border: 2px solid var(--c); background: #fff; color: var(--c); border-radius: 10px; cursor: pointer; }
+  .term-mode.on { background: var(--c); color: #fff; }
+  .term-lbl { display: block; font-size: 12px; font-weight: 600; color: #6B7482; margin: 10px 0 4px; }
+  .term-input { width: 100%; font-size: 22px; padding: 14px; border: 2px solid #CBD2DC; border-radius: 10px; background: #fff; }
+  .term-input:focus { outline: none; border-color: #0B5ED7; }
+  .term-msg { margin-top: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+  .term-msg.ok { background: #E6F6EE; color: #1E7A4D; }
+  .term-msg.err { background: #FCEAEA; color: #B02A1E; }
+  .term-msg.warn { background: #FFF4DE; color: #9A6200; }
+  .term-card { margin-top: 12px; padding: 14px; background: #fff; border: 1px solid #E3E7EC; border-radius: 10px; }
+  .term-code { font-size: 20px; font-weight: 700; }
+  .term-stock { margin: 6px 0; font-size: 15px; color: #45505F; }
+  .term-confirm { width: 100%; margin-top: 12px; padding: 16px; font-size: 18px; font-weight: 700; color: #fff; border: none; border-radius: 10px; cursor: pointer; }
+  .term-cancel { width: 100%; margin-top: 8px; padding: 12px; font-size: 15px; background: #EEF1F5; color: #45505F; border: none; border-radius: 10px; cursor: pointer; }
+  .term-hist-title { margin: 20px 0 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #9AA3B2; }
+  .term-hist { display: flex; justify-content: space-between; gap: 8px; padding: 8px 2px; border-bottom: 1px solid #E8ECF1; font-size: 14px; }
+  .term-sub { font-size: 13px; color: #8A93A3; }
+  .term-undo { padding: 6px 10px; font-size: 13px; font-weight: 600; background: #EEF1F5; color: #45505F; border: 1px solid #CBD2DC; border-radius: 8px; cursor: pointer; }
+  .term-undo.yes { background: #C0392B; color: #fff; border-color: #C0392B; }
+  @media (max-width: 760px) {
+    #app { flex-direction: column; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #E3E7EC; overflow-x: auto; overflow-y: hidden; }
+    .sidebar .brand, .navsection-label { display: none; }
+    .navsection { display: flex; padding: 6px; gap: 4px; }
+    .navbtn { width: auto; white-space: nowrap; margin: 0; }
+    .topbar { padding: 0 12px; }
+    .main { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* Claude dışında (indirilmiş dosya olarak) açılırsa bu bilgisayarın tarayıcı deposu kullanılır */
+if (!window.storage) {
+  try {
+    localStorage.setItem("erp:_test", "1"); localStorage.removeItem("erp:_test");
+    window.__localMode = true;
+    window.storage = {
+      async get(k) { const v = localStorage.getItem("erp:" + k); if (v === null) throw new Error("bulunamadı"); return { key: k, value: v }; },
+      async set(k, v) { localStorage.setItem("erp:" + k, v); return { key: k, value: v }; },
+      async delete(k) { localStorage.removeItem("erp:" + k); return { key: k, deleted: true }; },
+      async list(prefix) { const keys = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith("erp:" + (prefix || ""))) keys.push(k.slice(4)); } return { keys }; },
+    };
+  } catch (e) { /* tarayıcı depolamaya izin vermiyor */ }
+}
+
+/* =========================================================================
+   BULUT VERİTABANI (Supabase) — giriş yapan herkes aynı veriyi görür
+   Anahtar "publishable" türündedir, herkese açık olacak şekilde tasarlanmıştır;
+   verinin korunması giriş (Auth) ve veritabanındaki RLS kurallarıyla sağlanır.
+   ========================================================================= */
+const SB_URL = "https://kredqwokuayoqfxgkgyb.supabase.co";
+const SB_KEY = "sb_publishable_Gj6fh3-JGckFTfoNqnZchw_WfrtbKoF";
+window.__cloud = !!(SB_URL && SB_KEY);
+function newUuid() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === "x" ? r : (r & 3 | 8)).toString(16); });
+}
+let sbSession = null;
+try { sbSession = JSON.parse(localStorage.getItem("erp_sb_session") || "null"); } catch (e) {}
+function sbSaveSession(x) {
+  sbSession = x;
+  try { x ? localStorage.setItem("erp_sb_session", JSON.stringify(x)) : localStorage.removeItem("erp_sb_session"); } catch (e) {}
+}
+async function sbAuth(grant, body) {
+  const res = await fetch(SB_URL + "/auth/v1/token?grant_type=" + grant, { method: "POST", headers: { apikey: SB_KEY, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(j.error_description || j.msg || j.message || "Giriş başarısız");
+  return { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + (j.expires_in || 3600) * 1000, email: (j.user && j.user.email) || (sbSession && sbSession.email) || "" };
+}
+async function sbToken() {
+  if (!sbSession) throw new Error("Oturum yok, giriş yapın.");
+  if (Date.now() > sbSession.expires_at - 60000) {
+    try { sbSaveSession(await sbAuth("refresh_token", { refresh_token: sbSession.refresh_token })); }
+    catch (e) { sbSaveSession(null); cloudLoginScreen("Oturum süresi doldu, tekrar giriş yapın."); throw new Error("Oturum süresi doldu, tekrar giriş yapın."); }
+  }
+  return sbSession.access_token;
+}
+async function sbFetch(path, opt = {}) {
+  const token = await sbToken();
+  const res = await fetch(SB_URL + "/rest/v1/" + path, {
+    method: opt.method || "GET",
+    headers: Object.assign({ apikey: SB_KEY, Authorization: "Bearer " + token, "Content-Type": "application/json" }, opt.headers || {}),
+    body: opt.body !== undefined ? JSON.stringify(opt.body) : undefined,
+  });
+  const text = await res.text(); let j = null;
+  try { j = text ? JSON.parse(text) : null; } catch (e) {}
+  if (res.status === 401) { sbSaveSession(null); cloudLoginScreen("Oturum geçersiz, tekrar giriş yapın."); }
+  if (!res.ok) throw new Error((j && (j.message || j.error_description)) || ("HTTP " + res.status));
+  return j;
+}
+async function cloudRpc(fn, args) { return sbFetch("rpc/" + fn, { method: "POST", body: args }); }
+function cloudInvalidate() { ["stokTakip", "hareket", "sayim"].forEach(x => delete cache[recKey("stok", x)]); }
+
+const sv = v => (v === null || v === undefined) ? "" : String(v);
+const nn = v => (v === "" || v === null || v === undefined || isNaN(Number(v))) ? null : Number(v);
+const extraOf = (c, known) => { const o = {}; Object.keys(c).forEach(k => { if (k[0] !== "_" && !known.includes(k)) o[k] = c[k]; }); return o; };
+const CLOUD_TABLES = {
+  "records:stok__stokTakip": {
+    table: "stok", order: "created_at.desc",
+    fromRow: r => Object.assign({ _id: r.id, _createdAt: r.created_at, _sonHareket: r.son_hareket || "", malzemeKodu: r.malzeme_kodu, aciklama: r.aciklama, miktar: sv(r.miktar), birim: r.birim, durum: r.durum || "Uygun" }, r.ek || {}),
+    toRow: (c, id) => ({ id, malzeme_kodu: String(c.malzemeKodu || "").trim(), aciklama: c.aciklama || "", birim: c.birim || "", durum: c.durum || "Uygun", miktar: nn(c.miktar) || 0, son_hareket: c._sonHareket || null, created_at: c._createdAt || undefined, ek: extraOf(c, ["malzemeKodu", "aciklama", "miktar", "birim", "durum"]) }),
+  },
+  "records:stok__hareket": {
+    table: "hareket", order: "created_at.desc",
+    fromRow: r => ({ _id: r.id, _createdAt: r.created_at, _onceki: r.onceki, _sayimId: r.sayim_id || "", tarih: termDT(r.created_at), malzemeKodu: r.malzeme_kodu, tip: r.tip, miktar: sv(r.miktar), yeniStok: sv(r.yeni_stok), kullanici: r.kullanici || "", durum: r.durum || "Uygun", hedefDurum: r.hedef_durum || "", aciklama: r.aciklama || "" }),
+    toRow: (c, id) => ({ id, created_at: c._createdAt || undefined, malzeme_kodu: c.malzemeKodu || "", tip: c.tip, miktar: nn(c.miktar) || 0, onceki: nn(c._onceki) || 0, yeni_stok: nn(c.yeniStok) || 0, sayim_id: c._sayimId || null, kullanici: c.kullanici || null, durum: c.durum || "Uygun", hedef_durum: c.hedefDurum || null, aciklama: c.aciklama || null }),
+  },
+  "records:stok__sayim": {
+    table: "sayim", order: "created_at.desc",
+    fromRow: r => Object.assign({ _id: r.id, _createdAt: r.created_at, sayimNo: r.sayim_no || "", tarih: r.tarih || "", malzemeKodu: r.malzeme_kodu || "", sistemMiktar: sv(r.sistem_miktar), sayilanMiktar: sv(r.sayilan_miktar) }, r.ek || {}),
+    toRow: (c, id) => ({ id, created_at: c._createdAt || undefined, sayim_no: c.sayimNo || null, tarih: /^\d{4}-\d{2}-\d{2}/.test(c.tarih || "") ? c.tarih.slice(0, 10) : null, malzeme_kodu: c.malzemeKodu || null, sistem_miktar: nn(c.sistemMiktar), sayilan_miktar: nn(c.sayilanMiktar), ek: extraOf(c, ["sayimNo", "tarih", "malzemeKodu", "sistemMiktar", "sayilanMiktar"]) }),
+  },
+};
+const cloudSnap = {}, cloudLoadFailed = {};
+if (window.__cloud) {
+  window.__localMode = false;
+  window.storage = {
+    async get(key) {
+      try {
+        const T = CLOUD_TABLES[key];
+        let out;
+        if (T) {
+          const rows = await sbFetch(T.table + "?select=*&order=" + T.order + "&limit=1000");
+          const recs = rows.map(T.fromRow);
+          cloudSnap[key] = new Map(rows.map((r, i) => [r.id, JSON.stringify(T.toRow(recs[i], r.id))]));
+          out = JSON.stringify(recs);
+        } else {
+          const rows = await sbFetch("kv?select=value&key=eq." + encodeURIComponent(key));
+          if (!rows.length) { delete cloudLoadFailed[key]; throw new Error("bulunamadı"); }
+          out = JSON.stringify(rows[0].value);
+        }
+        delete cloudLoadFailed[key];
+        return { key, value: out };
+      } catch (e) {
+        if (e.message !== "bulunamadı") cloudLoadFailed[key] = true;
+        throw e;
+      }
+    },
+    async set(key, value) {
+      if (rolu() !== "admin") throw new Error("Yetkiniz yok: değiştirme ve silme yalnızca yetkili kullanıcıda");
+      if (cloudLoadFailed[key]) throw new Error("Veri okunamadığı için kayıt yapılmadı, sayfayı yenileyin");
+      const T = CLOUD_TABLES[key];
+      if (!T) {
+        await sbFetch("kv?on_conflict=key", { method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" }, body: { key, value: JSON.parse(value), updated_at: new Date().toISOString() } });
+        return { key, value };
+      }
+      const snap = cloudSnap[key] || new Map(), recs = JSON.parse(value), seen = new Set(), next = new Map(), jobs = [];
+      for (const c of recs) {
+        const row = T.toRow(c, c._id), str = JSON.stringify(row), old = snap.get(c._id);
+        seen.add(c._id); next.set(c._id, str);
+        if (old === str) continue;
+        if (old === undefined) {
+          jobs.push(() => sbFetch(T.table + "?on_conflict=id", { method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" }, body: row }));
+        } else {
+          const o = JSON.parse(old), ch = {};
+          Object.keys(row).forEach(k => { if (JSON.stringify(row[k]) !== JSON.stringify(o[k])) ch[k] = row[k]; });
+          if (Object.keys(ch).length) jobs.push(() => sbFetch(T.table + "?id=eq." + c._id, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: ch }));
+        }
+      }
+      const del = [...snap.keys()].filter(id => !seen.has(id));
+      if (del.length) jobs.push(() => sbFetch(T.table + "?id=in.(" + del.join(",") + ")", { method: "DELETE", headers: { Prefer: "return=minimal" } }));
+      for (const j of jobs) await j();
+      cloudSnap[key] = next;
+      return { key, value };
+    },
+    async delete() { return null; },
+    async list() { return { keys: [] }; },
+  };
+}
+function cloudLoginScreen(msg) {
+  let el = document.getElementById("cloud-login");
+  if (!el) { el = document.createElement("div"); el.id = "cloud-login"; document.body.appendChild(el); }
+  const inp = "width:100%;padding:12px;margin-bottom:10px;border:1px solid #CBD2DC;border-radius:8px;font-size:15px;box-sizing:border-box";
+  el.style.cssText = "position:fixed;inset:0;z-index:9999;background:#F0F3F8;display:flex;align-items:center;justify-content:center;font-family:Inter,system-ui,sans-serif";
+  el.innerHTML = `<form id="cl-form" style="background:#fff;padding:28px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);width:340px;max-width:92vw">
+    <h2 style="margin:0 0 4px">ERP Takip Programı</h2><div style="color:#6B7482;font-size:13px;margin-bottom:16px">Devam etmek için giriş yapın</div>
+    <input id="cl-mail" type="email" placeholder="E-posta" autocomplete="username" required style="${inp}" />
+    <input id="cl-pass" type="password" placeholder="Şifre" autocomplete="current-password" required style="${inp}" />
+    <div id="cl-err" style="color:#B02A1E;font-size:13px;min-height:18px;margin-bottom:8px">${esc(msg || "")}</div>
+    <button style="width:100%;padding:12px;font-size:16px;font-weight:700;background:#0B5ED7;color:#fff;border:none;border-radius:8px;cursor:pointer">Giriş</button></form>`;
+  document.getElementById("cl-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const err = document.getElementById("cl-err"); err.textContent = "Giriş yapılıyor…";
+    try {
+      sbSaveSession(await sbAuth("password", { email: document.getElementById("cl-mail").value.trim(), password: document.getElementById("cl-pass").value }));
+      el.remove(); cloudAfterLogin();
+    } catch (x) { err.textContent = /invalid login/i.test(x.message) ? "E-posta veya şifre hatalı." : x.message; }
+  });
+}
+function cloudLogoutButton() {
+  let b = document.getElementById("cloud-user");
+  if (!b) { b = document.createElement("div"); b.id = "cloud-user"; b.style.cssText = "position:fixed;left:10px;bottom:8px;z-index:50;font-size:12px;background:#fff;border:1px solid #D5DBE3;border-radius:8px;padding:5px 10px;color:#45505F"; document.body.appendChild(b); }
+  b.innerHTML = `${esc(sbSession ? sbSession.email : "")} · ${rolEtiket[rolu()]} · ${SURUM} · <a href="#" id="cloud-out">Çıkış</a>`;
+  document.getElementById("cloud-out").addEventListener("click", e => { e.preventDefault(); sbSaveSession(null); sbRol = null; document.body.classList.remove("rol-kisitli"); b.remove(); cloudLoginScreen(); });
+}
+let sbRol = null;
+const rolEtiket = { admin: "Yetkili", okutucu: "Okutucu", izleyici: "İzleyici" };
+const SURUM = "v3.5";
+const rolu = () => window.__cloud ? (sbRol || "izleyici") : "admin";
+async function cloudAfterLogin() {
+  Object.keys(cache).forEach(k => delete cache[k]);
+  try { sbRol = await cloudRpc("mevcut_rol", {}); } catch (e) { sbRol = "izleyici"; }
+  document.body.classList.toggle("rol-kisitli", rolu() !== "admin");
+  cloudLogoutButton(); render();
+}
+/* =========================================================================
+   MODÜL TANIMLARI (modül -> alt başlık -> alan şeması)
+   ========================================================================= */
+const MODULES = {
+  ik: { label: "İnsan Kaynakları", icon: "👥", subs: {
+    personel: { label: "Personel Bilgileri", fields: [
+      { key: "personelNo", label: "Personel No", type: "text", required: true, mono: true },
+      { key: "adSoyad", label: "Ad Soyad", type: "text" },
+      { key: "departman", label: "Departman", type: "select", options: ["Üretim","Kalite","Planlama","İSG","Metot","İdari"] },
+      { key: "girisTarihi", label: "İşe Giriş Tarihi", type: "date" },
+      { key: "durum", label: "Durum", type: "select", options: ["Aktif","İzinli","Ayrıldı"] },
+    ]},
+    bordro: { label: "Bordro/Puantaj", fields: [
+      { key: "personelNo", label: "Personel No", type: "text", required: true, mono: true },
+      { key: "donem", label: "Dönem", type: "text" },
+      { key: "calismaGunu", label: "Çalışma Günü", type: "number" },
+      { key: "fazlaMesaiSaat", label: "Fazla Mesai (sa)", type: "number" },
+      { key: "netUcret", label: "Net Ücret", type: "number" },
+    ]},
+    izin: { label: "İzin Yönetimi", fields: [
+      { key: "personelNo", label: "Personel No", type: "text", required: true, mono: true },
+      { key: "izinTipi", label: "İzin Tipi", type: "select", options: ["Yıllık","Mazeret","Rapor","Ücretsiz"] },
+      { key: "baslangic", label: "Başlangıç", type: "date" },
+      { key: "bitis", label: "Bitiş", type: "date" },
+      { key: "durum", label: "Durum", type: "select", options: ["Onay Bekliyor","Onaylandı","Reddedildi"] },
+    ]},
+    performans: { label: "Performans Değerlendirme", fields: [
+      { key: "personelNo", label: "Personel No", type: "text", required: true, mono: true },
+      { key: "donem", label: "Dönem", type: "text" },
+      { key: "puan", label: "Puan", type: "number" },
+      { key: "degerlendiren", label: "Değerlendiren", type: "text" },
+    ]},
+  }},
+  isg: { label: "İSG", icon: "🦺", subs: {
+    risk: { label: "Risk Değerlendirmesi", fields: [
+      { key: "alan", label: "Alan", type: "text", required: true },
+      { key: "riskTuru", label: "Risk Türü", type: "select", options: ["Fiziksel","Kimyasal","Ergonomik","Psikososyal"] },
+      { key: "riskSkoru", label: "Risk Skoru", type: "number" },
+      { key: "sorumlu", label: "Sorumlu", type: "text" },
+    ]},
+    kaza: { label: "Kaza/Olay Bildirimi", fields: [
+      { key: "olayNo", label: "Olay No", type: "text", required: true, mono: true },
+      { key: "tarih", label: "Tarih", type: "date" },
+      { key: "yer", label: "Yer", type: "text" },
+      { key: "tur", label: "Tür", type: "select", options: ["Kaza","Ramak Kala"] },
+      { key: "durum", label: "Durum", type: "select", options: ["İnceleniyor","Kapatıldı"] },
+    ]},
+    egitim: { label: "Eğitim ve Sertifika Takibi", fields: [
+      { key: "personelNo", label: "Personel No", type: "text", required: true, mono: true },
+      { key: "egitimAdi", label: "Eğitim Adı", type: "text" },
+      { key: "tarih", label: "Tarih", type: "date" },
+      { key: "gecerlilik", label: "Geçerlilik Tarihi", type: "date" },
+      { key: "durum", label: "Durum", type: "select", options: ["Geçerli","Süresi Doldu"] },
+    ]},
+    ppe: { label: "PPE Takibi", fields: [
+      { key: "personelNo", label: "Personel No", type: "text", required: true, mono: true },
+      { key: "ekipman", label: "Ekipman", type: "text" },
+      { key: "zimmetTarihi", label: "Zimmet Tarihi", type: "date" },
+      { key: "durum", label: "Durum", type: "select", options: ["Zimmetli","İade Edildi"] },
+    ]},
+    muayene: { label: "Periyodik Muayene/Kontrol", fields: [
+      { key: "ekipman", label: "Ekipman", type: "text", required: true },
+      { key: "kontrolTarihi", label: "Kontrol Tarihi", type: "date" },
+      { key: "sonrakiKontrol", label: "Sonraki Kontrol", type: "date" },
+      { key: "sonuc", label: "Sonuç", type: "select", options: ["Uygun","Uygun Değil"] },
+    ]},
+    denetim: { label: "Denetim ve Uygunsuzluk", fields: [
+      { key: "denetimNo", label: "Denetim No", type: "text", required: true, mono: true },
+      { key: "tarih", label: "Tarih", type: "date" },
+      { key: "bulgu", label: "Bulgu", type: "text" },
+      { key: "durum", label: "Durum", type: "select", options: ["Açık","Kapalı"] },
+    ]},
+  }},
+  planlama: { label: "Planlama", icon: "🗓️", subs: {
+    kapasite: { label: "Üretim/Kapasite Planlama", fields: [
+      { key: "planNo", label: "Plan No", type: "text", required: true, mono: true },
+      { key: "urun", label: "Ürün", type: "text" },
+      { key: "hedefMiktar", label: "Hedef Miktar", type: "number" },
+      { key: "mevcutKapasite", label: "Mevcut Kapasite", type: "number" },
+    ]},
+    mrp: { label: "Malzeme İhtiyaç Planlama", fields: [
+      { key: "malzemeKodu", label: "Malzeme Kodu", type: "text", required: true, mono: true },
+      { key: "ihtiyacMiktar", label: "İhtiyaç Miktar", type: "number" },
+      { key: "stokMiktar", label: "Stok Miktar", type: "number" },
+      { key: "durum", label: "Durum", type: "select", options: ["Yeterli","Sipariş Gerekli"] },
+    ]},
+    isEmri: { label: "İş Emri Yönetimi", fields: [
+      { key: "isEmriNo", label: "İş Emri No", type: "text", required: true, mono: true },
+      { key: "urun", label: "Ürün", type: "text" },
+      { key: "miktar", label: "Miktar", type: "number" },
+      { key: "durum", label: "Durum", type: "select", options: ["Planlandı","Devam Ediyor","Tamamlandı"] },
+    ]},
+    vardiya: { label: "Vardiya/Personel Planlama", fields: [
+      { key: "tarih", label: "Tarih", type: "date", required: true },
+      { key: "vardiya", label: "Vardiya", type: "select", options: ["Sabah","Akşam","Gece"] },
+      { key: "gorevliSayisi", label: "Görevli Sayısı", type: "number" },
+      { key: "sorumlu", label: "Sorumlu", type: "text" },
+    ]},
+    bakim: { label: "Bakım Planlama", fields: [
+      { key: "ekipman", label: "Ekipman", type: "text", required: true },
+      { key: "bakimTuru", label: "Bakım Türü", type: "select", options: ["Periyodik","Arıza"] },
+      { key: "planlananTarih", label: "Planlanan Tarih", type: "date" },
+      { key: "durum", label: "Durum", type: "select", options: ["Planlandı","Tamamlandı"] },
+    ]},
+  }},
+  kalite: { label: "Kalite", icon: "🧪", subs: {
+    dokuman: { label: "Doküman Yönetimi", fields: [
+      { key: "dokNo", label: "Doküman No", type: "text", required: true, mono: true },
+      { key: "baslik", label: "Başlık", type: "text" },
+      { key: "tur", label: "Tür", type: "select", options: ["Prosedür","Talimat","Form","Politika"] },
+      { key: "dosyaFormati", label: "Dosya Formatı", type: "select", options: ["Excel","Word","PDF","PowerPoint","Diğer"] },
+      { key: "dosyaLinki", label: "Dosya Linki (OneDrive/Teams)", type: "url" },
+      { key: "versiyon", label: "Versiyon", type: "text" },
+      { key: "durum", label: "Durum", type: "select", options: ["Taslak","Onay Bekliyor","Yayında","Revizyonda","Arşivlendi"] },
+    ]},
+    kontrol: { label: "Kalite Kontrol", fields: [
+      { key: "kontrolNo", label: "Kontrol No", type: "text", required: true, mono: true },
+      { key: "asama", label: "Aşama", type: "select", options: ["Giriş","Proses","Son"] },
+      { key: "tarih", label: "Tarih", type: "date" },
+      { key: "sonuc", label: "Sonuç", type: "select", options: ["Uygun","Uygun Değil"] },
+    ]},
+    uygunsuzluk: { label: "Uygunsuzluk Yönetimi", fields: [
+      { key: "uygunsuzlukNo", label: "Uygunsuzluk No", type: "text", required: true, mono: true },
+      { key: "tur", label: "Tür", type: "select", options: ["Ret","Fire"] },
+      { key: "miktar", label: "Miktar", type: "number" },
+      { key: "aciklama", label: "Açıklama", type: "text" },
+    ]},
+    dof: { label: "DÖF/CAPA", fields: [
+      { key: "dofNo", label: "DÖF No", type: "text", required: true, mono: true },
+      { key: "kaynak", label: "Kaynak", type: "text" },
+      { key: "acilanTarih", label: "Açılan Tarih", type: "date" },
+      { key: "durum", label: "Durum", type: "select", options: ["Açık","Kapalı"] },
+    ]},
+    kalibrasyon: { label: "Kalibrasyon Takibi", fields: [
+      { key: "ekipman", label: "Ekipman", type: "text", required: true },
+      { key: "kalibrasyonTarihi", label: "Kalibrasyon Tarihi", type: "date" },
+      { key: "sonrakiKalibrasyon", label: "Sonraki Kalibrasyon", type: "date" },
+      { key: "durum", label: "Durum", type: "select", options: ["Geçerli","Süresi Doldu"] },
+    ]},
+    sikayet: { label: "Müşteri Şikayet Yönetimi", fields: [
+      { key: "sikayetNo", label: "Şikayet No", type: "text", required: true, mono: true },
+      { key: "musteri", label: "Müşteri", type: "text" },
+      { key: "tarih", label: "Tarih", type: "date" },
+      { key: "durum", label: "Durum", type: "select", options: ["İnceleniyor","Kapatıldı"] },
+    ]},
+    denetim: { label: "Denetim", fields: [
+      { key: "denetimNo", label: "Denetim No", type: "text", required: true, mono: true },
+      { key: "tur", label: "Tür", type: "select", options: ["İç","Dış"] },
+      { key: "tarih", label: "Tarih", type: "date" },
+      { key: "durum", label: "Durum", type: "select", options: ["Açık","Kapalı"] },
+    ]},
+  }},
+  metot: { label: "Metot", icon: "📐", subs: {
+    etud: { label: "İş/Zaman Etüdü", fields: [
+      { key: "etudNo", label: "Etüd No", type: "text", required: true, mono: true },
+      { key: "islem", label: "İşlem", type: "text" },
+      { key: "olculenSureSn", label: "Ölçülen Süre (sn)", type: "number" },
+      { key: "tarih", label: "Tarih", type: "date" },
+    ]},
+    standartZaman: { label: "Standart Zaman Belirleme", fields: [
+      { key: "islemKodu", label: "İşlem Kodu", type: "text", required: true, mono: true },
+      { key: "standartSureSn", label: "Standart Süre (sn)", type: "number" },
+      { key: "onayDurumu", label: "Onay Durumu", type: "select", options: ["Taslak","Onaylı"] },
+    ]},
+    proses: { label: "İş Akışı/Proses Tasarımı", fields: [
+      { key: "prosesKodu", label: "Proses Kodu", type: "text", required: true, mono: true },
+      { key: "aciklama", label: "Açıklama", type: "text" },
+      { key: "istasyonSayisi", label: "İstasyon Sayısı", type: "number" },
+    ]},
+    kapasiteHesap: { label: "Kapasite Hesaplama", fields: [
+      { key: "hatKodu", label: "Hat Kodu", type: "text", required: true },
+      { key: "teorikKapasite", label: "Teorik Kapasite", type: "number" },
+      { key: "gerceklesenKapasite", label: "Gerçekleşen Kapasite", type: "number" },
+    ]},
+    maliyet: { label: "Maliyetlendirme", fields: [
+      { key: "urun", label: "Ürün", type: "text", required: true },
+      { key: "iscilikMaliyeti", label: "İşçilik Maliyeti", type: "number" },
+      { key: "malzemeMaliyeti", label: "Malzeme Maliyeti", type: "number" },
+    ]},
+    layout: { label: "Yerleşim Planlama (Layout)", fields: [
+      { key: "alan", label: "Alan", type: "text", required: true },
+      { key: "aciklama", label: "Açıklama", type: "text" },
+      { key: "revizyonTarihi", label: "Revizyon Tarihi", type: "date" },
+    ]},
+    devreyeAlma: { label: "Yeni Ürün/Proses Devreye Alma", fields: [
+      { key: "urun", label: "Ürün", type: "text", required: true },
+      { key: "metotKartNo", label: "Metot Kart No", type: "text", mono: true },
+      { key: "durum", label: "Durum", type: "select", options: ["Hazırlanıyor","Onaylandı"] },
+    ]},
+  }},
+  uretim: { label: "Üretim", icon: "🏭", subs: {
+    isEmri: { label: "İş Emri Yönetimi", fields: [
+      { key: "isEmriNo", label: "İş Emri No", type: "text", required: true, mono: true },
+      { key: "urun", label: "Ürün", type: "text" },
+      { key: "miktar", label: "Miktar", type: "number" },
+      { key: "durum", label: "Durum", type: "select", options: ["Planlandı","Devam Ediyor","Tamamlandı"] },
+    ]},
+    takip: { label: "Üretim Takip", fields: [
+      { key: "tarih", label: "Tarih", type: "date", required: true },
+      { key: "vardiya", label: "Vardiya", type: "select", options: ["Sabah","Akşam","Gece"] },
+      { key: "urun", label: "Ürün", type: "text" },
+      { key: "gerceklesenAdet", label: "Gerçekleşen Adet", type: "number" },
+      { key: "hedefAdet", label: "Hedef Adet", type: "number" },
+    ]},
+    hat: { label: "Hat/İstasyon Yönetimi", fields: [
+      { key: "hatKodu", label: "Hat Kodu", type: "text", required: true },
+      { key: "istasyon", label: "İstasyon", type: "text" },
+      { key: "durum", label: "Durum", type: "select", options: ["Aktif","Bakımda","Pasif"] },
+    ]},
+    durus: { label: "Duruş Takibi", fields: [
+      { key: "tarih", label: "Tarih", type: "date", required: true },
+      { key: "hat", label: "Hat", type: "text" },
+      { key: "nedenTuru", label: "Neden Türü", type: "select", options: ["Arıza","Bakım","Malzeme Bekleme","İSG"] },
+      { key: "sureDk", label: "Süre (dk)", type: "number" },
+    ]},
+    oee: { label: "OEE Takibi", fields: [
+      { key: "tarih", label: "Tarih", type: "date", required: true },
+      { key: "hat", label: "Hat", type: "text" },
+      { key: "oeeYuzde", label: "OEE (%)", type: "number" },
+    ]},
+    fire: { label: "Fire/Ret Takibi", fields: [
+      { key: "tarih", label: "Tarih", type: "date", required: true },
+      { key: "urun", label: "Ürün", type: "text" },
+      { key: "fireMiktar", label: "Fire Miktar", type: "number" },
+      { key: "nedeni", label: "Nedeni", type: "text" },
+    ]},
+    raporlama: { label: "Vardiya Bazlı Raporlama", fields: [
+      { key: "tarih", label: "Tarih", type: "date", required: true },
+      { key: "vardiya", label: "Vardiya", type: "select", options: ["Sabah","Akşam","Gece"] },
+      { key: "toplamAdet", label: "Toplam Adet", type: "number" },
+    ]},
+    sevkHazirlik: { label: "Sevkiyat/Paketleme Hazırlık", fields: [
+      { key: "siparisNo", label: "Sipariş No", type: "text", required: true, mono: true },
+      { key: "urun", label: "Ürün", type: "text" },
+      { key: "miktar", label: "Miktar", type: "number" },
+      { key: "durum", label: "Durum", type: "select", options: ["Hazırlanıyor","Hazır"] },
+    ]},
+  }},
+  satinalma: { label: "Satın Alma", icon: "🛒", subs: {
+    tedarikci: { label: "Tedarikçi Yönetimi", fields: [
+      { key: "tedarikciKodu", label: "Tedarikçi Kodu", type: "text", required: true, mono: true },
+      { key: "unvan", label: "Ünvan", type: "text" },
+      { key: "kategori", label: "Kategori", type: "text" },
+      { key: "durum", label: "Durum", type: "select", options: ["Aktif","Pasif"] },
+    ]},
+    siparis: { label: "Sipariş Yönetimi", fields: [
+      { key: "siparisNo", label: "Sipariş No", type: "text", required: true, mono: true },
+      { key: "tedarikci", label: "Tedarikçi", type: "text" },
+      { key: "tarih", label: "Tarih", type: "date" },
+      { key: "tutar", label: "Tutar", type: "number" },
+      { key: "durum", label: "Durum", type: "select", options: ["Beklemede","Onaylandı","Teslim Alındı"] },
+    ]},
+    teklif: { label: "Teklif/Karşılaştırma", fields: [
+      { key: "teklifNo", label: "Teklif No", type: "text", required: true, mono: true },
+      { key: "tedarikci", label: "Tedarikçi", type: "text" },
+      { key: "malzeme", label: "Malzeme", type: "text" },
+      { key: "fiyat", label: "Fiyat", type: "number" },
+    ]},
+  }},
+  stok: { label: "Stok/Depo", icon: "📦", subs: {
+    stokTakip: { label: "Stok Takibi", fields: [
+      { key: "malzemeKodu", label: "Malzeme Kodu", type: "text", required: true, mono: true },
+      { key: "aciklama", label: "Açıklama", type: "text" },
+      { key: "miktar", label: "Miktar", type: "number" },
+      { key: "birim", label: "Birim", type: "text" },
+      { key: "durum", label: "Durum", type: "select", options: ["Uygun","Onay Bekliyor","Ret"] },
+    ]},
+    lokasyon: { label: "Depo Lokasyon Yönetimi", fields: [
+      { key: "lokasyonKodu", label: "Lokasyon Kodu", type: "text", required: true, mono: true },
+      { key: "depo", label: "Depo", type: "text" },
+      { key: "kapasite", label: "Kapasite", type: "number" },
+    ]},
+    sayim: { label: "Sayım İşlemleri", fields: [
+      { key: "sayimNo", label: "Sayım No", type: "text", required: true, mono: true },
+      { key: "tarih", label: "Tarih", type: "date" },
+      { key: "malzemeKodu", label: "Malzeme Kodu", type: "text" },
+      { key: "sistemMiktar", label: "Sistem Miktar", type: "number" },
+      { key: "sayilanMiktar", label: "Sayılan Miktar", type: "number" },
+    ]},
+    hareket: { label: "Stok Hareketleri", skipUniversal: true, fields: [
+      { key: "tarih", label: "Tarih/Saat", type: "text" },
+      { key: "malzemeKodu", label: "Malzeme Kodu", type: "text", required: true, mono: true },
+      { key: "tip", label: "İşlem", type: "text" },
+      { key: "miktar", label: "Miktar", type: "number" },
+      { key: "yeniStok", label: "Yeni Stok", type: "number" },
+      { key: "kullanici", label: "Kullanıcı", type: "text" },
+      { key: "durum", label: "Durum", type: "text" },
+      { key: "hedefDurum", label: "Hedef Durum", type: "text" },
+      { key: "aciklama", label: "Açıklama", type: "text" },
+    ]},
+  }},
+  muhasebe: { label: "Muhasebe/Finans", icon: "💰", subs: {
+    cari: { label: "Cari Hesap", fields: [
+      { key: "cariKodu", label: "Cari Kodu", type: "text", required: true, mono: true },
+      { key: "unvan", label: "Ünvan", type: "text" },
+      { key: "tip", label: "Tip", type: "select", options: ["Müşteri","Tedarikçi"] },
+      { key: "bakiye", label: "Bakiye", type: "number" },
+    ]},
+    fatura: { label: "Fatura Yönetimi", fields: [
+      { key: "faturaNo", label: "Fatura No", type: "text", required: true, mono: true },
+      { key: "cari", label: "Cari", type: "text" },
+      { key: "tarih", label: "Tarih", type: "date" },
+      { key: "tutar", label: "Tutar", type: "number" },
+      { key: "durum", label: "Durum", type: "select", options: ["Ödendi","Bekliyor"] },
+    ]},
+    butce: { label: "Bütçe Takibi", fields: [
+      { key: "donem", label: "Dönem", type: "text", required: true },
+      { key: "kategori", label: "Kategori", type: "text" },
+      { key: "planlanan", label: "Planlanan", type: "number" },
+      { key: "gerceklesen", label: "Gerçekleşen", type: "number" },
+    ]},
+  }},
+  denetim: { label: "Denetim", icon: "🗂️", subs: {
+    vestel: { label: "Vestel", skipUniversal: true, fields: [
+      { key: "evrakAdi", label: "Evrak Adı", type: "text" },
+      { key: "dosya", label: "Dosya", type: "file", required: true },
+      { key: "aciklama", label: "Açıklama", type: "text" },
+      { key: "durum", label: "Durum", type: "select", options: ["İstendi", "Yüklendi", "Onaylandı", "Reddedildi"] },
+    ]},
+    arcelik: { label: "Arçelik", skipUniversal: true, fields: [
+      { key: "evrakAdi", label: "Evrak Adı", type: "text" },
+      { key: "dosya", label: "Dosya", type: "file", required: true },
+      { key: "aciklama", label: "Açıklama", type: "text" },
+      { key: "durum", label: "Durum", type: "select", options: ["İstendi", "Yüklendi", "Onaylandı", "Reddedildi"] },
+    ]},
+    haier: { label: "Haier", skipUniversal: true, fields: [
+      { key: "evrakAdi", label: "Evrak Adı", type: "text" },
+      { key: "dosya", label: "Dosya", type: "file", required: true },
+      { key: "aciklama", label: "Açıklama", type: "text" },
+      { key: "durum", label: "Durum", type: "select", options: ["İstendi", "Yüklendi", "Onaylandı", "Reddedildi"] },
+    ]},
+  }},
+};
+
+const STATUS_COLORS = {
+  "Aktif": "#1E8E5A", "İzinli": "#C79A3D", "Ayrıldı": "#8A93A3",
+  "Onay Bekliyor": "#C79A3D", "Onaylandı": "#1E8E5A", "Reddedildi": "#C0392B",
+  "İnceleniyor": "#C79A3D", "Kapatıldı": "#1E8E5A", "Açık": "#C0392B", "Kapalı": "#1E8E5A",
+  "Geçerli": "#1E8E5A", "Süresi Doldu": "#C0392B", "Uygun": "#1E8E5A", "Uygun Değil": "#C0392B",
+  "Taslak": "#8A93A3", "Onaylı": "#1E8E5A", "Planlandı": "#8A93A3", "Devam Ediyor": "#C79A3D",
+  "Tamamlandı": "#1E8E5A", "Yeterli": "#1E8E5A", "Sipariş Gerekli": "#C0392B",
+  "Zimmetli": "#C79A3D", "İade Edildi": "#1E8E5A", "Beklemede": "#C79A3D", "Teslim Alındı": "#1E8E5A",
+  "Ödendi": "#1E8E5A", "Bekliyor": "#C79A3D", "Hazırlanıyor": "#C79A3D", "Hazır": "#1E8E5A",
+  "Pasif": "#8A93A3", "Yayında": "#1E8E5A", "Revizyonda": "#C79A3D", "Arşivlendi": "#8A93A3",
+  "İstendi": "#C79A3D", "Yüklendi": "#0B5ED7",
+};
+
+/* =========================================================================
+   KALİTE STANDARTLARI VE KONTROL METOTLARI — hazır referans kütüphanesi
+   (Türkiye ve dünya çapında). Statik bilgidir, kullanıcı girişi gerekmez.
+   ========================================================================= */
+const STANDARDS = [
+  { kod: "ISO 9001", ad: "Kalite Yönetim Sistemi", bolge: "Uluslararası", kategori: "Genel Kalite", aciklama: "Her sektörden kuruluş için temel kalite yönetim sistemi standardı.",
+    nedir: "ISO 9001, bir kuruluşun ürün/hizmetlerini tutarlı şekilde müşteri ve mevzuat gereksinimlerine uygun sunabildiğini gösteren, dünyada en yaygın kullanılan kalite yönetim sistemi standardıdır. Süreç yaklaşımı, risk odaklı düşünce ve sürekli iyileştirme (PUKÖ döngüsü) üzerine kuruludur. Sektör bağımsızdır; küçük atölyeden büyük fabrikaya her ölçekte kuruluşta uygulanabilir." },
+  { kod: "ISO 14001", ad: "Çevre Yönetim Sistemi", bolge: "Uluslararası", kategori: "Çevre", aciklama: "Kuruluşların çevresel etkilerini yönetmesi için sistem standardı.",
+    nedir: "ISO 14001, bir kuruluşun faaliyetlerinin çevre üzerindeki etkilerini (atık, emisyon, enerji/kaynak kullanımı vb.) sistematik olarak belirleyip azaltmasını sağlayan yönetim sistemi standardıdır. Yasal uyumluluğu artırırken kurumsal itibar ve sürdürülebilirlik hedeflerine de katkı sunar." },
+  { kod: "ISO 45001", ad: "İş Sağlığı ve Güvenliği Yönetim Sistemi", bolge: "Uluslararası", kategori: "İSG", aciklama: "Çalışan sağlığı ve güvenliği risklerinin yönetimi için standart.",
+    nedir: "ISO 45001, işyerinde çalışanları etkileyebilecek risklerin önceden belirlenip azaltılmasını, kaza ve meslek hastalıklarının önlenmesini hedefleyen uluslararası İSG yönetim sistemi standardıdır. Türkiye'de 6331 sayılı İSG Kanunu'nun uygulamasını sistematik hale getirmede de kullanılır." },
+  { kod: "ISO 17025", ad: "Deney ve Kalibrasyon Laboratuvarlarının Yeterliliği", bolge: "Uluslararası", kategori: "Laboratuvar/Kalibrasyon", aciklama: "Test ve kalibrasyon laboratuvarlarının teknik yeterliliği için genel şartlar.",
+    nedir: "ISO 17025, bir test/kalibrasyon laboratuvarının teknik olarak yetkin ve sonuçlarının güvenilir olduğunu gösteren akreditasyon standardıdır. Ölçüm belirsizliği, cihaz kalibrasyonu, personel yetkinliği ve metot doğrulama gibi konularda şart koyar; genellikle TÜRKAK gibi ulusal akreditasyon kurumlarınca denetlenir." },
+  { kod: "ISO 22000", ad: "Gıda Güvenliği Yönetim Sistemi", bolge: "Uluslararası", kategori: "Gıda", aciklama: "Gıda tedarik zincirinde güvenlik yönetimi için standart.",
+    nedir: "ISO 22000, tarladan sofraya tüm gıda tedarik zincirinde gıda güvenliği risklerini yönetmek için HACCP prensipleriyle ISO yönetim sistemi yaklaşımını birleştiren standarttır. Gıda üreticisinden lojistik firmasına kadar zincirdeki her aktör tarafından uygulanabilir." },
+  { kod: "IATF 16949", ad: "Otomotiv Sektörü Kalite Yönetim Sistemi", bolge: "Uluslararası", kategori: "Otomotiv", aciklama: "Otomotiv üreticileri ve tedarikçileri için ISO 9001'i tamamlayan sektörel standart.",
+    nedir: "IATF 16949, otomotiv ana sanayi ve yan sanayi tedarikçilerinin uyması gereken, ISO 9001'i sıfır hata hedefi, PPAP, APQP, MSA gibi otomotive özgü araçlarla genişleten sektörel kalite standardıdır. Büyük otomotiv üreticilerine tedarik yapabilmenin ön koşullarından biridir." },
+  { kod: "ISO 13485", ad: "Tıbbi Cihazlar Kalite Yönetim Sistemi", bolge: "Uluslararası", kategori: "Medikal", aciklama: "Tıbbi cihaz tasarım ve üretiminde kalite yönetimi şartları.",
+    nedir: "ISO 13485, tıbbi cihazların tasarım, üretim, kurulum ve servis süreçlerinde hasta güvenliğini önceleyen, düzenleyici gereksinimlere uyumu esas alan kalite yönetim sistemi standardıdır. CE işareti veya benzeri tıbbi cihaz onayları için genellikle ön şarttır." },
+  { kod: "ISO 27001", ad: "Bilgi Güvenliği Yönetim Sistemi", bolge: "Uluslararası", kategori: "Bilgi Güvenliği", aciklama: "Kurumsal bilgi varlıklarının güvenliğini yönetmek için standart.",
+    nedir: "ISO 27001, kurumsal verilerin gizlilik, bütünlük ve erişilebilirliğini korumak için risk analizine dayalı bir bilgi güvenliği yönetim sistemi kurmayı tanımlayan standarttır. Siber güvenlik risklerine karşı kurumsal güvence sağlamak isteyen her sektörden kuruluş tarafından kullanılır." },
+  { kod: "ISO 50001", ad: "Enerji Yönetim Sistemi", bolge: "Uluslararası", kategori: "Enerji", aciklama: "Enerji performansının sürekli iyileştirilmesi için yönetim sistemi.",
+    nedir: "ISO 50001, kuruluşların enerji tüketimini sistematik şekilde izleyip azaltmasını sağlayan yönetim sistemi standardıdır. Enerji maliyetlerinin düşürülmesi ve karbon ayak izinin azaltılması hedefleyen kuruluşlarda giderek daha fazla tercih edilmektedir." },
+  { kod: "ISO 31000", ad: "Risk Yönetimi", bolge: "Uluslararası", kategori: "Risk", aciklama: "Kurumsal risk yönetimi için ilke ve kılavuzlar.",
+    nedir: "ISO 31000, bir belgelendirme standardı değil, kuruluşların her türlü riski (operasyonel, finansal, stratejik vb.) tanımlama, değerlendirme ve yönetme sürecine dair genel çerçeve ve ilkeler sunan bir kılavuz standarttır." },
+  { kod: "AS9100", ad: "Havacılık, Uzay ve Savunma Kalite Yönetim Sistemi", bolge: "Uluslararası", kategori: "Havacılık", aciklama: "Havacılık/savunma tedarik zinciri için ISO 9001 tabanlı sektörel standart.",
+    nedir: "AS9100, havacılık, uzay ve savunma sektöründeki üreticilerin uyması gereken, ISO 9001'i izlenebilirlik, konfigürasyon yönetimi ve risk yönetimi gibi sektöre özgü ek şartlarla genişleten kalite standardıdır." },
+  { kod: "VDA 6.3", ad: "Süreç Denetimi (Alman Otomotiv Endüstrisi)", bolge: "Uluslararası", kategori: "Otomotiv", aciklama: "Alman otomotiv sektöründe süreç bazlı tedarikçi denetim metodolojisi.",
+    nedir: "VDA 6.3, Alman otomotiv üreticilerinin (VDA - Verband der Automobilindustrie) tedarikçilerini değerlendirmek için kullandığı, ürün geliştirmeden seri üretime kadar sürecin her aşamasını puanlayan bir süreç denetim metodolojisidir." },
+  { kod: "TS EN ISO 9001", ad: "Kalite Yönetim Sistemi (Türk Standardı)", bolge: "Türkiye", kategori: "Genel Kalite", aciklama: "ISO 9001'in TSE tarafından yayımlanan Türkçe/ulusal karşılığı.",
+    nedir: "TS EN ISO 9001, uluslararası ISO 9001 standardının Türk Standardları Enstitüsü (TSE) tarafından Türkçeye çevrilip ulusal standart olarak yayımlanan birebir karşılığıdır; içerik ve şartlar bakımından ISO 9001 ile aynıdır." },
+  { kod: "TSE Hizmet Yeterlilik Belgesi", ad: "Hizmet Yeterlilik Belgesi", bolge: "Türkiye", kategori: "Hizmet", aciklama: "Hizmet sektöründe işletmenin yeterliliğini gösteren TSE belgesi.",
+    nedir: "TSE Hizmet Yeterlilik Belgesi, servis, bakım, onarım gibi hizmet veren işletmelerin personel, teçhizat ve fiziki şartlar açısından TSE'nin belirlediği asgari yeterlilik kriterlerini karşıladığını gösteren, Türkiye'ye özgü bir belgedir." },
+  { kod: "G Markası", ad: "Zorunlu Ürün Belgelendirmesi", bolge: "Türkiye", kategori: "Ürün Güvenliği", aciklama: "Sanayi ve Teknoloji Bakanlığı'nca bazı ürünler için zorunlu tutulan uygunluk işareti.",
+    nedir: "G Markası, CE kapsamı dışında kalan ancak T.C. Sanayi ve Teknoloji Bakanlığı'nca güvenlik açısından risk taşıdığı belirlenen bazı ürün gruplarının (ör. bazı yapı malzemeleri, ürünler) piyasaya sürülebilmesi için zorunlu tutulan ulusal bir uygunluk işaretidir." },
+  { kod: "CE İşareti", ad: "Avrupa Uygunluk İşareti", bolge: "Uluslararası / Türkiye", kategori: "Ürün Güvenliği", aciklama: "Ürünün AB mevzuatına uygunluğunu gösterir; Türkiye'de de birçok ürün grubunda zorunludur.",
+    nedir: "CE işareti, bir ürünün Avrupa Birliği'nin ilgili sağlık, güvenlik ve çevre mevzuatına uygun olduğunu gösteren zorunlu bir uygunluk işaretidir. Türkiye, AB ile Gümrük Birliği kapsamında birçok ürün grubunda CE işaretini kendi mevzuatına da (CE işaretinin Türkçe MEVZUAT karşılıkları ile) uyarlamıştır." },
+];
+
+const QC_METHODS = [
+  { ad: "İstatistiksel Proses Kontrolü (SPC)", kategori: "İstatistiksel", aciklama: "Kontrol kartları ile üretim prosesinin istatistiksel olarak izlenmesi.",
+    nedir: "SPC, bir üretim prosesinin zaman içinde istatistiksel yöntemlerle (kontrol kartları, ortalama/varyasyon hesapları) izlenerek kararlı ve öngörülebilir kalmasını sağlayan bir kalite kontrol yaklaşımıdır. Amaç, hataları ürün ortaya çıktıktan sonra yakalamak yerine, proses sapma göstermeye başladığı anda fark edip önlemektir.",
+    adimlar: ["İzlenecek kritik kalite karakteristiğini (ör. çap, ağırlık) belirleyin.", "Belirli aralıklarla örnekler alıp ölçüm verisini toplayın.", "Ortalama ve kontrol limitlerini (ÜKL/AKL) hesaplayarak kontrol kartını oluşturun.", "Verileri kart üzerine işleyip, limit dışı veya anormal örüntüleri (trend, seri) izleyin.", "Limit dışı bir nokta görüldüğünde kök nedeni araştırıp düzeltici aksiyon alın."] },
+  { ad: "Kontrol Kartları (Shewhart)", kategori: "İstatistiksel", aciklama: "Proses ortalaması ve varyasyonunun zaman içinde grafikle izlenmesi.",
+    nedir: "Kontrol kartları, Walter Shewhart tarafından geliştirilen, bir proses karakteristiğinin ölçüm değerlerini zaman ekseninde üst/alt kontrol limitleriyle birlikte gösteren grafiksel araçlardır. Prosesteki normal (doğal) varyasyon ile anormal (özel neden kaynaklı) varyasyonu birbirinden ayırt etmeyi sağlar.",
+    adimlar: ["Uygun kart türünü seçin (X-bar/R, p, np, c, u vb. veri tipine göre).", "Alt grup büyüklüğü ve örnekleme sıklığını belirleyin.", "İlk 20-25 alt grup ile deneme kontrol limitlerini hesaplayın.", "Prosesi kart üzerinde sürekli izleyin; 8 nokta kuralı gibi örüntü kurallarını uygulayın.", "Proses kararlı hale geldikçe limitleri periyodik olarak güncelleyin."] },
+  { ad: "FMEA (Hata Türü ve Etkileri Analizi)", kategori: "Risk Analizi", aciklama: "Potansiyel hataların önceden belirlenip risk önceliğine göre sıralanması.",
+    nedir: "FMEA, bir ürün veya prosesteki olası hata türlerini, bu hataların etkilerini ve nedenlerini sistematik olarak inceleyip, hatalar gerçekleşmeden önce risklerini azaltmayı amaçlayan önleyici bir risk analizi yöntemidir. Şiddet (S), olasılık (O) ve saptanabilirlik (D) puanlarının çarpımıyla elde edilen Risk Öncelik Sayısı (RPN) ile risklere öncelik verilir.",
+    adimlar: ["Ürün/proses adımlarını ve olası hata türlerini listeleyin.", "Her hatanın etkisini, şiddetini (S), olasılığını (O) ve saptanabilirliğini (D) 1-10 arası puanlayın.", "Risk Öncelik Sayısını (RPN = S×O×D) hesaplayın.", "En yüksek RPN'li kalemler için önleyici/düzeltici aksiyonlar tanımlayın.", "Aksiyon sonrası puanları güncelleyip RPN'in düştüğünü doğrulayın."] },
+  { ad: "8D Problem Çözme Metodolojisi", kategori: "Problem Çözme", aciklama: "8 adımda kök neden analizi ve kalıcı çözüm geliştirme yöntemi.",
+    nedir: "8D, özellikle otomotiv sektöründe yaygın kullanılan, bir problemin acil (geçici) önlemle durdurulmasından kök nedeninin bulunup kalıcı çözümle ortadan kaldırılmasına kadar 8 disiplinli adımdan oluşan yapılandırılmış bir problem çözme metodolojisidir. Genellikle müşteri şikayeti veya ciddi uygunsuzluklarda kullanılır.",
+    adimlar: ["D1: Problem çözme takımını kurun.", "D2: Problemi net ve ölçülebilir şekilde tanımlayın.", "D3: Geçici (acil) önleyici aksiyonu uygulayın.", "D4: Kök nedeni (ve kaçış noktasını) belirleyin.", "D5-D6: Kalıcı düzeltici aksiyonu seçip uygulayın ve doğrulayın.", "D7: Tekrarını önlemek için sistemsel önlemler alın.", "D8: Takımı ve başarıyı kutlayıp süreci kapatın."] },
+  { ad: "5 Neden Analizi (5 Why)", kategori: "Problem Çözme", aciklama: "Bir sorunun kök nedenine ulaşana kadar art arda 'neden' sorularak ilerleme.",
+    nedir: "5 Neden Analizi, bir sorunun yüzeydeki belirtisinden gerçek kök nedenine ulaşmak için art arda \"neden?\" sorusunun sorulduğu basit ama etkili bir kök neden analizi tekniğidir. Genellikle 5 tur soruda kök nedene ulaşılır, ancak sayı sabit değildir; önemli olan mantıklı ve eyleme geçirilebilir bir nedene varmaktır.",
+    adimlar: ["Problemi açık ve net cümleyle tanımlayın.", "\"Neden oldu?\" diye sorup ilk nedeni yazın.", "Bulunan her nedene tekrar \"neden?\" sorusunu sorarak ilerleyin (genelde 5 tur).", "Kök nedene ulaşıldığında (bir önceki neden mantıklı bir sistemsel eksikliğe dayanıyorsa) durun.", "Kök nedene yönelik düzeltici aksiyonu tanımlayın."] },
+  { ad: "Ishikawa / Balık Kılçığı Diyagramı", kategori: "Problem Çözme", aciklama: "Bir sorunun olası nedenlerini kategori bazında görselleştiren neden-sonuç diyagramı.",
+    nedir: "Ishikawa diyagramı (balık kılçığı diyagramı olarak da bilinir), Kaoru Ishikawa tarafından geliştirilen, bir sorunun olası nedenlerini Makine, Metot, Malzeme, İnsan, Ölçüm, Çevre gibi ana kategoriler altında görsel olarak organize eden bir beyin fırtınası ve kök neden analizi aracıdır.",
+    adimlar: ["Sorunu diyagramın \"baş\" kısmına (sağ uca) yazın.", "Ana kategorileri belirleyin (ör. 6M: Makine, Metot, Malzeme, İnsan, Ölçüm, Çevre).", "Her kategori altında beyin fırtınasıyla olası nedenleri listeleyin.", "Gerekirse alt nedenleri dallandırarak derinleştirin.", "En olası nedenleri işaretleyip doğrulama için veri toplayın."] },
+  { ad: "Pareto Analizi", kategori: "İstatistiksel", aciklama: "Sorunların %80'inin nedenlerin %20'sinden kaynaklandığı ilkesiyle önceliklendirme.",
+    nedir: "Pareto Analizi, \"sonuçların büyük çoğunluğu az sayıda nedenden kaynaklanır\" (80/20 ilkesi) prensibine dayanan, hata/şikayet türlerini sıklıklarına göre sıralayarak iyileştirme çabalarının en yüksek etkiyi yaratacak az sayıdaki nedene odaklanmasını sağlayan bir önceliklendirme aracıdır.",
+    adimlar: ["Hata/şikayet türlerini ve frekanslarını toplayın.", "Verileri sıklığa göre büyükten küçüğe sıralayın.", "Çubuk grafik üzerine kümülatif yüzde çizgisini ekleyin.", "Kümülatif %80'e denk gelen kalemleri belirleyin.", "İyileştirme çalışmalarını bu az sayıdaki yüksek etkili nedene odaklayın."] },
+  { ad: "PPAP (Üretim Parçası Onay Süreci)", kategori: "Otomotiv/Tedarikçi", aciklama: "Yeni parçanın seri üretime geçmeden önce müşteri onayına sunulma süreci.",
+    nedir: "PPAP, özellikle otomotiv tedarik zincirinde, yeni veya değişiklik yapılmış bir parçanın seri üretime geçmeden önce tasarım kayıtları, proses verileri ve numune sonuçlarıyla birlikte müşteriye onaya sunulduğu resmi bir doğrulama sürecidir. Amaç, tedarikçinin süreci güvenilir şekilde tekrarlanabilir kalitede üretebildiğini kanıtlamaktır.",
+    adimlar: ["Tasarım kayıtları ve mühendislik değişikliklerini derleyin.", "Proses akış şeması ve kontrol planını hazırlayın.", "Ölçüm sistem analizi (MSA) ve boyutsal sonuçları toplayın.", "Örnek parça üretimi ve kapasite çalışmasını (Cpk) gerçekleştirin.", "İlgili seviyeye (1-5) göre dosyayı derleyip müşteri onayına sunun."] },
+  { ad: "MSA (Ölçüm Sistemi Analizi)", kategori: "Ölçüm", aciklama: "Ölçüm sistemlerinin doğruluk ve tekrarlanabilirliğinin değerlendirilmesi.",
+    nedir: "MSA, kalite kontrolde kullanılan ölçüm cihaz ve yöntemlerinin ne kadar güvenilir olduğunu (doğruluk, tekrarlanabilirlik, yeniden üretilebilirlik) istatistiksel olarak değerlendiren bir çalışmadır. Amaç, karar verilen ölçüm sonuçlarının gerçek parça varyasyonunu mu yoksa ölçüm hatasını mı yansıttığını anlamaktır.",
+    adimlar: ["Ölçüm cihazını ve incelenecek karakteristiği belirleyin.", "Birden fazla operatör ile aynı parçaları tekrarlı ölçtürün (Gage R&R).", "Tekrarlanabilirlik (aynı operatör) ve yeniden üretilebilirlik (operatörler arası) varyasyonunu hesaplayın.", "Toplam ölçüm varyasyonunun toleransa oranını değerlendirin.", "Kabul edilemezse ölçüm cihazı/metodu/eğitimi iyileştirin."] },
+  { ad: "APQP (İleri Ürün Kalite Planlama)", kategori: "Planlama", aciklama: "Yeni ürün geliştirmede kaliteyi baştan planlamaya yönelik yapılandırılmış süreç.",
+    nedir: "APQP, yeni bir ürün geliştirme sürecinde kaliteyi sona bırakmak yerine baştan planlamayı sağlayan, otomotiv sektöründe yaygın kullanılan yapılandırılmış bir aşamalı planlama metodolojisidir. Ürün tasarımından seri üretime kadar her aşamada kalite risklerini önceden ele alır.",
+    adimlar: ["Program planlama ve müşteri gereksinimlerini tanımlayın.", "Ürün tasarımı ve geliştirme aşamasını yürütün.", "Proses tasarımı ve geliştirmeyi (akış şeması, kontrol planı) tamamlayın.", "Ürün ve proses onayını (PPAP dahil) gerçekleştirin.", "Geri bildirim, değerlendirme ve düzeltici aksiyon döngüsünü sürdürün."] },
+  { ad: "DMAIC (Six Sigma)", kategori: "Sürekli İyileştirme", aciklama: "Tanımla-Ölç-Analiz Et-İyileştir-Kontrol Et döngüsüyle proses iyileştirme.",
+    nedir: "DMAIC, Six Sigma metodolojisinin temel çerçevesidir; bir prosesteki sorunları veri odaklı şekilde Tanımla-Ölç-Analiz Et-İyileştir-Kontrol Et adımlarıyla sistematik olarak çözmeyi ve kazanımları kalıcı hale getirmeyi amaçlar.",
+    adimlar: ["Tanımla (Define): Problemi, hedefi ve müşteri gereksinimini netleştirin.", "Ölç (Measure): Mevcut proses performansını veriyle ölçün.", "Analiz Et (Analyze): Kök nedenleri istatistiksel araçlarla belirleyin.", "İyileştir (Improve): Çözümleri test edip uygulayın.", "Kontrol Et (Control): Kazanımları kontrol planı ve izleme ile kalıcı hale getirin."] },
+  { ad: "Kaizen", kategori: "Sürekli İyileştirme", aciklama: "Küçük, sürekli adımlarla süreç ve kalite iyileştirme felsefesi.",
+    nedir: "Kaizen, Japonca \"iyi\" ve \"değişim\" kelimelerinin birleşiminden gelen, büyük ve maliyetli atılımlar yerine çalışanların katılımıyla küçük, sürekli iyileştirme adımlarıyla süreç ve kalitenin geliştirilmesini savunan bir yönetim felsefesidir.",
+    adimlar: ["İyileştirilecek alanı ve mevcut durumu gözlemleyin.", "Çalışanlarla birlikte israf ve sorun noktalarını belirleyin.", "Küçük, hızlı uygulanabilir iyileştirme fikirleri üretin (Kaizen etkinliği).", "Fikirleri kısa sürede test edip uygulayın.", "Sonuçları standartlaştırın ve döngüyü tekrarlayın."] },
+  { ad: "Poka-Yoke (Hata Önleme)", kategori: "Hata Önleme", aciklama: "Hataların oluşmadan veya fark edilmeden önce önlenmesini sağlayan tasarım/yöntemler.",
+    nedir: "Poka-Yoke, Japonca \"hatadan kaçınma\" anlamına gelen, bir işlemin yanlış yapılmasını fiziksel olarak imkansız hale getiren veya hatayı anında fark ettiren basit tasarım/mekanizma çözümleridir (ör. bir parçanın yalnızca doğru yönde takılabildiği yuva tasarımı). Amaç hatayı düzeltmek değil, baştan oluşmasını engellemektir.",
+    adimlar: ["Hataya en açık işlem adımını belirleyin.", "Hatanın kaynağını (unutma, yanlış parça, yanlış yönlendirme vb.) analiz edin.", "Hatayı fiziksel olarak imkansız kılacak bir düzenek/kontrol tasarlayın (ör. asimetrik parça yuvası).", "Çözümü pilot uygulayıp etkinliğini doğrulayın.", "Başarılı çözümü standart hale getirip benzer istasyonlara yayın."] },
+  { ad: "Kalite Çemberleri", kategori: "Katılımcı Kalite", aciklama: "Çalışanların küçük gruplar halinde kalite sorunlarını tartışıp çözüm önermesi.",
+    nedir: "Kalite Çemberleri, aynı iş alanında çalışan küçük bir grup çalışanın gönüllü olarak düzenli aralıklarla bir araya gelip, kendi iş süreçlerindeki kalite sorunlarını tartışıp analiz ederek yönetime çözüm önerileri sunduğu katılımcı bir kalite yönetimi yaklaşımıdır.",
+    adimlar: ["Aynı alanda çalışan 5-8 kişilik gönüllü bir grup oluşturun.", "Düzenli (haftalık/aylık) toplantılarla iş alanındaki sorunları listeleyin.", "Kalite araçlarıyla (Pareto, Ishikawa vb.) sorunu analiz edin.", "Çözüm önerisini yönetime sunun.", "Uygulanan çözümün sonucunu izleyip paylaşın."] },
+  { ad: "AQL Örnekleme Planları (ISO 2859)", kategori: "Örnekleme", aciklama: "Parti bazlı kabul edilebilir kalite seviyesine göre örnekleme ile kontrol.",
+    nedir: "AQL (Kabul Edilebilir Kalite Seviyesi) örnekleme planları, bir üretim partisinin tamamını %100 kontrol etmek yerine, istatistiksel olarak belirlenmiş bir örneklem üzerinden kontrol ederek partinin kabul veya reddine karar verilmesini sağlayan ISO 2859 tabanlı bir kalite kontrol yöntemidir.",
+    adimlar: ["Parti büyüklüğünü ve kabul edilebilir kalite seviyesini (AQL) belirleyin.", "Standart tablodan örnekleme büyüklüğünü ve kabul/red sayılarını okuyun.", "Partiden rastgele örneklem çekip kontrol edin.", "Bulunan hatalı sayısını kabul/red sınırıyla karşılaştırın.", "Sonuca göre partiyi kabul edin, reddedin veya tam kontrole alın."] },
+];
+
+/* =========================================================================
+   KALICI / PAYLAŞIMLI DEPOLAMA — window.storage (shared: true)
+   Bu sayede farklı bilgisayarlardan girilen kayıtlar herkes için kalıcı ve ortak olur.
+   ========================================================================= */
+const cache = {};
+function recKey(moduleId, subId) { return "records:" + moduleId + "__" + subId; }
+
+async function loadRecords(moduleId, subId) {
+  const key = recKey(moduleId, subId);
+  if (cache[key]) return cache[key];
+  try {
+    const res = await window.storage.get(key, true);
+    const parsed = res && res.value ? JSON.parse(res.value) : [];
+    cache[key] = parsed;
+    return parsed;
+  } catch (e) {
+    cache[key] = [];
+    return [];
+  }
+}
+
+let lastSaveError = "";
+async function loadCopy(m, sub) { return JSON.parse(JSON.stringify(await loadRecords(m, sub))); }
+async function saveRecords(moduleId, subId, records) {
+  const key = recKey(moduleId, subId);
+  const previous = cache[key];
+  cache[key] = records;
+  setSyncing(true);
+  if (!window.storage) { lastSaveError = "depolama yok"; cache[key] = previous; setSyncing(false); return false; }
+  for (let i = 0; i < 3; i++) {
+    try {
+      await window.storage.set(key, JSON.stringify(records), true);
+      lastSaveError = ""; setSyncing(false); return true;
+    } catch (e) {
+      lastSaveError = String((e && e.message) || e);
+      console.error("Kayıt hatası:", e);
+      if (/Yetkiniz yok/.test(lastSaveError)) break;
+      await new Promise(r => setTimeout(r, 400 * (i + 1)));
+    }
+  }
+  cache[key] = previous; setSyncing(false); return false;
+}
+function saveErrText() {
+  if (/Yetkiniz yok/.test(lastSaveError)) return "Yetkiniz yok: değiştirme ve silme yalnızca yetkili kullanıcıda.";
+  return lastSaveError === "depolama yok"
+    ? "Kayıt yapılamıyor: dosya Claude dışında açılmış (depolama yok). Dosyayı Claude içinde açın."
+    : "Kayıt başarısız oldu" + (lastSaveError ? " (" + lastSaveError.slice(0, 80) + ")" : "") + ", tekrar deneyin.";
+}
+
+function formatFileSize(bytes) {
+  if (!bytes) return "0 KB";
+  const units = ["B", "KB", "MB", "GB"];
+  let i = 0, val = bytes;
+  while (val >= 1024 && i < units.length - 1) { val /= 1024; i++; }
+  return `${val.toFixed(val < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+let syncing = false;
+function setSyncing(v) {
+  syncing = v;
+  const tag = document.getElementById("sync-tag");
+  if (tag) {
+    tag.className = "synctag" + (v ? " saving" : "");
+    tag.innerHTML = `<span class="dot"></span> ${v ? "Kaydediliyor…" : (window.__localMode ? "Kayıtlı — bu bilgisayarda" : "Kayıtlı — paylaşımlı")}`;
+  }
+}
+
+let state = { activeModule: "dashboard", activeSub: null, showForm: false, formError: "" };
+
+function esc(v) {
+  if (v === undefined || v === null) return "";
+  return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function firstSubId(moduleId) { return Object.keys(MODULES[moduleId].subs)[0]; }
+
+function renderNav() {
+  const items = [
+    { id: "dashboard", label: "Pano", icon: "▦" },
+    { id: "terminal", label: "El Terminali", icon: "📟" },
+    { id: "etiket", label: "Etiket Yazdır", icon: "🏷" },
+    { id: "yetki", label: "Yetkiler", icon: "👤" },
+    ...Object.entries(MODULES).map(([id, c]) => ({ id, label: c.label, icon: c.icon })),
+    { id: "analiz", label: "Analiz ve Değerlendirme", icon: "📊" },
+    { id: "standartlar", label: "Standartlar ve Metotlar", icon: "📏" },
+  ];
+  return items.map(it => `
+    <button class="navbtn ${state.activeModule === it.id ? "active" : ""}" data-nav="${it.id}">
+      <span class="ic">${it.icon}</span> ${it.label}
+    </button>`).join("");
+}
+
+function renderSubtabs(moduleId) {
+  const cfg = MODULES[moduleId];
+  return `<div class="subtabs">${Object.entries(cfg.subs).map(([subId, s]) => `
+    <button class="subtab ${state.activeSub === subId ? "active" : ""}" data-subtab="${subId}">${s.label}</button>`).join("")}</div>`;
+}
+
+const UNIVERSAL_FIELDS = [
+  { key: "ekLink", label: "Ek Dosya / Ekran Görüntüsü (Link)", type: "url" },
+  { key: "ekAciklama", label: "Ek Açıklama", type: "text" },
+];
+function fullFields(sub) { return sub.skipUniversal ? sub.fields : sub.fields.concat(UNIVERSAL_FIELDS); }
+
+function renderFormCard(moduleId, subId) {
+  const sub = MODULES[moduleId].subs[subId];
+  const fieldsHtml = fullFields(sub).map(f => {
+    if (f.type === "select") {
+      return `<label>${f.label}${f.required ? ' <span style="color:#C0392B">*</span>' : ""}
+        <select name="${f.key}">${f.options.map(o => `<option value="${esc(o)}">${esc(o)}</option>`).join("")}</select></label>`;
+    }
+    if (f.type === "file") {
+      return `<label>${f.label}${f.required ? ' <span style="color:#C0392B">*</span>' : ""}
+        <input type="file" name="${f.key}" />
+        <span style="display:block;font-size:11px;color:#9AA3B2;font-weight:400;margin-top:3px">En fazla ~3,5 MB</span></label>`;
+    }
+    return `<label>${f.label}${f.required ? ' <span style="color:#C0392B">*</span>' : ""}
+      <input type="${f.type}" name="${f.key}" class="${f.mono ? "mono" : ""}" /></label>`;
+  }).join("");
+  return `
+    <form class="form-card" id="entry-form" data-module="${moduleId}" data-sub="${subId}" enctype="multipart/form-data">
+      ${fieldsHtml}
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+        ${state.formError ? `<span class="error-msg">⚠ ${esc(state.formError)}</span>` : ""}
+      </div>
+    </form>`;
+}
+
+async function renderModulePage(moduleId) {
+  const cfg = MODULES[moduleId];
+  if (!state.activeSub || !cfg.subs[state.activeSub]) state.activeSub = firstSubId(moduleId);
+  const subId = state.activeSub;
+  const sub = cfg.subs[subId];
+  const allFields = fullFields(sub);
+  if (state.moduleSearchText === undefined) state.moduleSearchText = "";
+  const allRecords = await loadRecords(moduleId, subId);
+  const q = state.moduleSearchText.trim().toLocaleLowerCase("tr");
+  const records = q
+    ? allRecords.filter(r => allFields.some(f => {
+        const raw = f.type === "file" ? (r[f.key + "_adi"] || "") : (r[f.key] || "");
+        return raw.toString().toLocaleLowerCase("tr").includes(q);
+      }))
+    : allRecords;
+  const rows = records.length === 0
+    ? `<tr class="empty-row"><td colspan="${allFields.length + 2}">${allRecords.length === 0 ? `Henüz kayıt yok. "Yeni Kayıt" ile başla.` : "Aramanızla eşleşen kayıt bulunamadı."}</td></tr>`
+    : records.map(r => {
+        const cells = allFields.map(f => {
+          const val = r[f.key];
+          if (f.mono) return `<td><span class="stamp">${esc(val) || "—"}</span></td>`;
+          if (f.type === "file") {
+            if (!val) return `<td>—</td>`;
+            const adi = r[f.key + "_adi"] || "dosya";
+            const boyut = r[f.key + "_boyut"];
+            return `<td><a href="${val}" download="${esc(adi)}" style="color:#0B5ED7;font-weight:600;text-decoration:none">⬇ ${esc(adi)}</a>${boyut ? `<br><span style="font-size:11px;color:#9AA3B2">${formatFileSize(boyut)}</span>` : ""}</td>`;
+          }
+          if (f.type === "url") return val ? `<td><a href="${esc(val)}" target="_blank" rel="noopener noreferrer" style="color:#0B5ED7;font-weight:600;text-decoration:none">Dosyayı Aç ↗</a></td>` : `<td>—</td>`;
+          if (f.type === "select" && STATUS_COLORS[val]) return `<td><span class="badge" style="background:${STATUS_COLORS[val]}">${esc(val)}</span></td>`;
+          return `<td>${esc(val) || "—"}</td>`;
+        }).join("");
+        return `<tr>${cells}<td>${formatKayitTarihi(r._createdAt)}</td><td><button class="btn-plain" data-del="${r._id}" data-module="${moduleId}" data-sub="${subId}">✕</button></td></tr>`;
+      }).join("");
+
+  return `
+    <div class="eyebrow">Modül</div>
+    <h2 class="pagetitle">${cfg.label}</h2>
+    <div class="divider-line"></div>
+    ${renderSubtabs(moduleId)}
+    <div class="headrow">
+      <input id="module-search" type="text" placeholder="Bu tabloda ara… (ör. isim, no, tarih)"
+        value="${esc(state.moduleSearchText)}"
+        style="padding:8px 12px;border-radius:7px;border:1px solid #D7DCE3;font-size:13.5px;width:260px;font-family:inherit" />
+      <button class="btn ${state.showForm ? "btn-dark" : "btn-primary"}" id="toggle-form">${state.showForm ? "✕ İptal" : "+ Yeni Kayıt"}</button>
+    </div>
+    <div class="eyebrow" style="margin:10px 0 -2px">${sub.label}${q ? ` — ${records.length}/${allRecords.length} kayıt eşleşti` : ""}</div>
+    ${state.showForm ? renderFormCard(moduleId, subId) : ""}
+    <div class="table-card"><div style="overflow-x:auto"><table>
+      <thead><tr>${allFields.map(f => `<th>${f.label}</th>`).join("")}<th>Kayıt Tarihi</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div></div>`;
+}
+
+function formatKayitTarihi(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+async function renderDashboard() {
+  const [personel, dof, isgDenetim, dokuman, uretimTakip, kaliteKontrol] = await Promise.all([
+    loadRecords("ik", "personel"), loadRecords("kalite", "dof"), loadRecords("isg", "denetim"),
+    loadRecords("kalite", "dokuman"), loadRecords("uretim", "takip"), loadRecords("kalite", "kontrol"),
+  ]);
+
+  const aktifPersonel = personel.filter(r => r.durum === "Aktif").length;
+  const acikDof = dof.filter(r => r.durum === "Açık").length;
+  const acikIsg = isgDenetim.filter(r => r.durum === "Açık").length;
+  const yayindaDokuman = dokuman.filter(r => r.durum === "Yayında").length;
+
+  const byDate = {};
+  uretimTakip.forEach(r => { if (r.tarih) byDate[r.tarih] = (byDate[r.tarih] || 0) + (Number(r.gerceklesenAdet) || 0); });
+  const chartEntries = Object.entries(byDate).sort((a, b) => a[0].localeCompare(b[0])).slice(-8);
+  const maxVal = Math.max(1, ...chartEntries.map(e => e[1]));
+  const barsHtml = chartEntries.length === 0
+    ? `<div class="loading-box">Henüz üretim takip verisi yok</div>`
+    : `<div class="bar-row">${chartEntries.map(([tarih, adet]) => `
+        <div class="bar-col"><div class="bar-value">${adet}</div>
+        <div class="bar" style="background:#0B5ED7;height:${Math.max(6, (adet / maxVal) * 160)}px"></div>
+        <div class="bar-label">${tarih.slice(5)}</div></div>`).join("")}</div>`;
+
+  const uygun = kaliteKontrol.filter(r => r.sonuc === "Uygun").length;
+  const uygunDegil = kaliteKontrol.filter(r => r.sonuc === "Uygun Değil").length;
+  const total = uygun + uygunDegil;
+  let donutHtml;
+  if (total === 0) {
+    donutHtml = `<div class="loading-box">Henüz kalite kontrol verisi yok</div>`;
+  } else {
+    const p1 = (uygun / total) * 360;
+    donutHtml = `<div class="donut-wrap">
+      <div class="donut" style="background: conic-gradient(#1E8E5A 0deg ${p1}deg, #C0392B ${p1}deg 360deg);"></div>
+      <div><div class="legend-item"><span class="legend-dot" style="background:#1E8E5A"></span> Uygun (${uygun})</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#C0392B"></span> Uygun Değil (${uygunDegil})</div></div></div>`;
+  }
+
+  const kpis = [
+    { label: "Aktif Personel", value: aktifPersonel },
+    { label: "Açık DÖF", value: acikDof },
+    { label: "Açık İSG Bulgusu", value: acikIsg },
+    { label: "Yayındaki Doküman", value: yayindaDokuman },
+  ];
+
+  return `
+    <div class="eyebrow">Genel Bakış</div>
+    <h2 class="pagetitle">Entegre Yönetim Sistemi — Pano</h2>
+    <div class="divider-line"></div>
+    <div class="kpi-grid">${kpis.map(k => `<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join("")}</div>
+    <div class="chart-grid">
+      <div class="chart-card"><div class="chart-title">Günlük Üretim (son 8 gün)</div>${barsHtml}</div>
+      <div class="chart-card"><div class="chart-title">Kalite Kontrol Sonuç Dağılımı</div>${donutHtml}</div>
+    </div>
+    <div class="footnote">${window.__cloud ? "Veriler bulut veritabanında tutulur; giriş yapan herkes aynı veriyi görür ve günceller." : window.__localMode ? "Veriler bu bilgisayarın tarayıcısında tutulur, başka bilgisayarlarla paylaşılmaz. Düzenli yedek alın (El Terminali ekranında)." : "Veriler paylaşımlı depoda tutulur — bu sohbeti/önizlemeyi açan herkes aynı veriyi görür ve güncelleyebilir."}</div>`;
+}
+
+function renderStandartlar() {
+  if (!state.standartlarTab) state.standartlarTab = "standartlar";
+  if (state.standartlarFilter === undefined) state.standartlarFilter = "";
+  if (state.standartDetay) return renderStandartDetay(state.standartDetay.tip, state.standartDetay.key);
+
+  const q = state.standartlarFilter.trim().toLocaleLowerCase("tr");
+
+  const isStandartlar = state.standartlarTab === "standartlar";
+  const list = isStandartlar
+    ? STANDARDS.filter(s => (s.kod + s.ad + s.bolge + s.kategori + s.aciklama).toLocaleLowerCase("tr").includes(q))
+    : QC_METHODS.filter(m => (m.ad + m.kategori + m.aciklama).toLocaleLowerCase("tr").includes(q));
+
+  const tableHtml = isStandartlar
+    ? `<div class="table-card"><div style="overflow-x:auto"><table>
+        <thead><tr><th>Kod</th><th>Ad</th><th>Bölge</th><th>Kategori</th><th>Açıklama</th><th></th></tr></thead>
+        <tbody>${list.length === 0 ? `<tr class="empty-row"><td colspan="6">Sonuç bulunamadı</td></tr>` : list.map(s => `
+          <tr class="clickrow" data-opendetay="standart" data-key="${esc(s.kod)}">
+            <td><span class="stamp">${esc(s.kod)}</span></td>
+            <td>${esc(s.ad)}</td>
+            <td><span class="badge" style="background:${s.bolge.includes('Türkiye') ? '#C79A3D' : '#0B5ED7'}">${esc(s.bolge)}</span></td>
+            <td>${esc(s.kategori)}</td>
+            <td style="white-space:normal;max-width:320px">${esc(s.aciklama)}</td>
+            <td><span style="color:#0B5ED7;font-weight:600;font-size:12.5px">Eğitim Dokümanı ›</span></td>
+          </tr>`).join("")}</tbody>
+      </table></div></div>`
+    : `<div class="table-card"><div style="overflow-x:auto"><table>
+        <thead><tr><th>Yöntem</th><th>Kategori</th><th>Açıklama</th><th></th></tr></thead>
+        <tbody>${list.length === 0 ? `<tr class="empty-row"><td colspan="4">Sonuç bulunamadı</td></tr>` : list.map(m => `
+          <tr class="clickrow" data-opendetay="metot" data-key="${esc(m.ad)}">
+            <td style="white-space:normal;font-weight:600">${esc(m.ad)}</td>
+            <td><span class="badge" style="background:#55707F">${esc(m.kategori)}</span></td>
+            <td style="white-space:normal;max-width:380px">${esc(m.aciklama)}</td>
+            <td><span style="color:#0B5ED7;font-weight:600;font-size:12.5px">Eğitim Dokümanı ›</span></td>
+          </tr>`).join("")}</tbody>
+      </table></div></div>`;
+
+  return `
+    <div class="eyebrow">Referans Kütüphanesi</div>
+    <h2 class="pagetitle">Kalite Standartları ve Kontrol Metotları</h2>
+    <div class="divider-line"></div>
+    <div class="subtabs">
+      <button class="subtab ${isStandartlar ? "active" : ""}" data-standarttab="standartlar">Standartlar (Türkiye &amp; Dünya)</button>
+      <button class="subtab ${!isStandartlar ? "active" : ""}" data-standarttab="metotlar">Kalite Kontrol Metotları</button>
+    </div>
+    <div class="headrow">
+      <input id="standart-search" type="text" placeholder="Ara: örn. ISO 9001, gıda, FMEA…"
+        value="${esc(state.standartlarFilter)}"
+        style="padding:8px 12px;border-radius:7px;border:1px solid #D7DCE3;font-size:13.5px;width:280px;font-family:inherit" />
+    </div>
+    <div style="margin:14px 0"></div>
+    ${tableHtml}
+    <div class="footnote">Bu liste sabit bir referans kütüphanesidir; ayrı bir işlem kaydı oluşturmaz, sadece kalite ekibinize kılavuzluk için hazırdır. İhtiyacınıza göre ekleme/çıkarma yapılabilir. Bir satıra tıklayarak indirilebilir/yazdırılabilir eğitim dokümanını açabilirsiniz.</div>`;
+}
+
+const GENERIC_STANDARD_STEPS = [
+  "Kapsam Belirleme: Standardın hangi süreç/lokasyon/ürünleri kapsayacağını netleştirin.",
+  "Mevcut Durum (Boşluk) Analizi: Şu anki uygulamaları standardın şartlarıyla karşılaştırın.",
+  "Doküman ve Prosedür Hazırlığı: Gerekli politika, prosedür ve talimatları oluşturun.",
+  "Eğitim ve Farkındalık: İlgili personeli standart şartları ve yeni süreçler konusunda eğitin.",
+  "İç Denetim: Uygulamayı belgelendirme öncesi kendi ekibinizle denetleyin, uygunsuzlukları kapatın.",
+  "Belgelendirme Denetimi: Akredite bir belgelendirme kuruluşu ile resmi denetimi gerçekleştirin.",
+  "Sürekli İyileştirme: Periyodik iç/dış denetim ve yönetim gözden geçirmeleriyle sistemi canlı tutun.",
+];
+
+function buildTrainingDoc(tip, key) {
+  const isStandart = tip === "standart";
+  const item = isStandart ? STANDARDS.find(s => s.kod === key) : QC_METHODS.find(m => m.ad === key);
+  if (!item) return null;
+  const title = isStandart ? `${item.kod} — ${item.ad}` : item.ad;
+  const sections = [];
+  sections.push({ h: (isStandart ? item.kod : item.ad) + " Nedir?", body: [item.nedir || item.aciklama] });
+  if (isStandart) {
+    sections.push({ h: "Bölge / Kategori", body: [`${item.bolge} — ${item.kategori}`] });
+    sections.push({ h: "Uygulama Yol Haritası", list: GENERIC_STANDARD_STEPS });
+    sections.push({ h: "Not", body: ["Bu doküman standardın resmi metni değildir; kalite ekibi için hazırlanmış uygulama rehberi niteliğindedir. Standardın tam ve güncel metni için ilgili belgelendirme kuruluşuna (TSE, akredite denetim firmaları vb.) başvurulmalıdır."] });
+  } else {
+    sections.push({ h: "Kategori", body: [item.kategori] });
+    sections.push({ h: "Uygulama Adımları", list: item.adimlar || [] });
+    sections.push({ h: "Not", body: ["Bu yöntem genel kalite mühendisliği pratiğidir; kuruluşunuzun ihtiyacına göre uyarlanabilir."] });
+  }
+  return { title, sections };
+}
+
+function trainingDocHtml(doc) {
+  const bodyHtml = doc.sections.map(s => `
+    <h2>${esc(s.h)}</h2>
+    ${s.list ? `<ul>${s.list.map(li => `<li>${esc(li)}</li>`).join("")}</ul>` : `<p>${esc(s.body.join(" "))}</p>`}
+  `).join("");
+  return `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>${esc(doc.title)} — Eğitim Dokümanı</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; color: #1F2937; line-height: 1.6; padding: 0 20px; }
+    h1 { font-size: 24px; border-bottom: 3px solid #0B5ED7; padding-bottom: 10px; }
+    h2 { font-size: 16px; color: #0B5ED7; margin-top: 26px; }
+    ul { padding-left: 20px; } li { margin-bottom: 6px; }
+    .meta { color: #8A93A3; font-size: 12.5px; margin-bottom: 20px; }
+    @media print { body { margin: 10px auto; } }
+  </style></head><body>
+  <h1>${esc(doc.title)}</h1>
+  <div class="meta">Entegre Yönetim Sistemi — Eğitim Dokümanı · Hazırlanma Tarihi: ${formatKayitTarihi(new Date().toISOString())}</div>
+  ${bodyHtml}
+  </body></html>`;
+}
+
+function renderStandartDetay(tip, key) {
+  const doc = buildTrainingDoc(tip, key);
+  if (!doc) return `<div class="loading-box">Kayıt bulunamadı.</div>`;
+  const bodyHtml = doc.sections.map(s => `
+    <div class="chart-card" style="margin-bottom:12px">
+      <div class="chart-title">${esc(s.h)}</div>
+      ${s.list ? `<ul class="rank-list" style="list-style:disc;padding-left:18px">${s.list.map(li => `<li style="display:list-item;border:none;padding:4px 0">${esc(li)}</li>`).join("")}</ul>` : `<div style="font-size:13.5px;color:#45505F">${esc(s.body.join(" "))}</div>`}
+    </div>`).join("");
+
+  return `
+    <div class="eyebrow"><a href="#" id="detay-geri" style="color:#0B5ED7;text-decoration:none">‹ Standartlar ve Metotlar listesine dön</a></div>
+    <h2 class="pagetitle">${esc(doc.title)} — Eğitim Dokümanı</h2>
+    <div class="divider-line"></div>
+    <div class="headrow" style="margin-bottom:14px">
+      <div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" id="doc-indir">⬇ İndir (.html)</button>
+        <button class="btn btn-dark" id="doc-yazdir">🖨 Yazdır / PDF Kaydet</button>
+      </div>
+    </div>
+    ${bodyHtml}
+    <div class="footnote">Bu doküman, sistemin hazır referans verisinden otomatik oluşturulmuştur.</div>`;
+}
+
+async function renderAnaliz() {
+  const [dof, uygunsuzluk, isgKaza, isgDenetim, uretimTakip, uretimFire, uretimDurus, siparis, faturalar] = await Promise.all([
+    loadRecords("kalite", "dof"), loadRecords("kalite", "uygunsuzluk"), loadRecords("isg", "kaza"),
+    loadRecords("isg", "denetim"), loadRecords("uretim", "takip"), loadRecords("uretim", "fire"),
+    loadRecords("uretim", "durus"), loadRecords("satinalma", "siparis"), loadRecords("muhasebe", "fatura"),
+  ]);
+
+  // 1) Kalite performans skoru: açık/kapalı DÖF oranı
+  const dofKapali = dof.filter(r => r.durum === "Kapalı").length;
+  const dofToplam = dof.length;
+  const dofOran = dofToplam ? Math.round((dofKapali / dofToplam) * 100) : null;
+
+  // 2) Üretim gerçekleşme oranı (hedef vs gerçekleşen)
+  const toplamHedef = uretimTakip.reduce((s, r) => s + (Number(r.hedefAdet) || 0), 0);
+  const toplamGerc = uretimTakip.reduce((s, r) => s + (Number(r.gerceklesenAdet) || 0), 0);
+  const gerceklesmeOrani = toplamHedef ? Math.round((toplamGerc / toplamHedef) * 100) : null;
+
+  // 3) Duruş nedenleri dağılımı
+  const durusByNeden = {};
+  uretimDurus.forEach(r => { const k = r.nedenTuru || "Diğer"; durusByNeden[k] = (durusByNeden[k] || 0) + (Number(r.sureDk) || 0); });
+  const durusEntries = Object.entries(durusByNeden).sort((a, b) => b[1] - a[1]);
+  const durusMax = Math.max(1, ...durusEntries.map(e => e[1]));
+
+  // 4) Fire miktarı toplamı ürün bazlı, en çok fire veren ilk 5
+  const fireByUrun = {};
+  uretimFire.forEach(r => { const k = r.urun || "Belirtilmemiş"; fireByUrun[k] = (fireByUrun[k] || 0) + (Number(r.fireMiktar) || 0); });
+  const fireEntries = Object.entries(fireByUrun).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+  // 5) İSG olay/ramak kala oranı
+  const kazaSayisi = isgKaza.filter(r => r.tur === "Kaza").length;
+  const ramakKalaSayisi = isgKaza.filter(r => r.tur === "Ramak Kala").length;
+  const isgAcikDenetim = isgDenetim.filter(r => r.durum === "Açık").length;
+
+  // 6) Satın alma: bekleyen sipariş tutarı
+  const bekleyenTutar = siparis.filter(r => r.durum === "Beklemede").reduce((s, r) => s + (Number(r.tutar) || 0), 0);
+  const bekleyenFaturaTutar = faturalar.filter(r => r.durum === "Bekliyor").reduce((s, r) => s + (Number(r.tutar) || 0), 0);
+
+  const scoreCards = [
+    { label: "DÖF Kapatma Oranı", value: dofOran === null ? "—" : dofOran + "%", note: dofToplam ? `${dofKapali}/${dofToplam} kapatıldı` : "Henüz DÖF kaydı yok", color: dofOran === null ? "#8A93A3" : (dofOran >= 70 ? "#1E8E5A" : dofOran >= 40 ? "#C79A3D" : "#C0392B") },
+    { label: "Üretim Gerçekleşme Oranı", value: gerceklesmeOrani === null ? "—" : gerceklesmeOrani + "%", note: toplamHedef ? `${toplamGerc}/${toplamHedef} adet` : "Henüz üretim verisi yok", color: gerceklesmeOrani === null ? "#8A93A3" : (gerceklesmeOrani >= 90 ? "#1E8E5A" : gerceklesmeOrani >= 70 ? "#C79A3D" : "#C0392B") },
+    { label: "İSG Kaza / Ramak Kala", value: `${kazaSayisi} / ${ramakKalaSayisi}`, note: `${isgAcikDenetim} açık denetim bulgusu`, color: kazaSayisi > 0 ? "#C0392B" : "#1E8E5A" },
+    { label: "Bekleyen Sipariş Tutarı", value: bekleyenTutar.toLocaleString("tr-TR"), note: `Bekleyen fatura: ${bekleyenFaturaTutar.toLocaleString("tr-TR")}`, color: "#0B5ED7" },
+  ];
+
+  const durusHtml = durusEntries.length === 0
+    ? `<div class="loading-box">Henüz duruş verisi yok</div>`
+    : `<ul class="rank-list">${durusEntries.map(([neden, dk]) => `
+        <li><span>${esc(neden)}</span><span class="n">${dk} dk</span></li>`).join("")}</ul>`;
+
+  const fireHtml = fireEntries.length === 0
+    ? `<div class="loading-box">Henüz fire verisi yok</div>`
+    : `<ul class="rank-list">${fireEntries.map(([urun, miktar]) => `
+        <li><span>${esc(urun)}</span><span class="n">${miktar}</span></li>`).join("")}</ul>`;
+
+  return `
+    <div class="eyebrow">Değerlendirme</div>
+    <h2 class="pagetitle">Analiz ve Değerlendirme</h2>
+    <div class="divider-line"></div>
+    <div class="kpi-grid">${scoreCards.map(k => `
+      <div class="kpi-card" style="border-left-color:${k.color}">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-value">${k.value}</div>
+        <div class="kpi-sub">${k.note}</div>
+      </div>`).join("")}</div>
+    <div class="analiz-row">
+      <div class="chart-card"><div class="chart-title">Duruş Nedenleri (toplam dakika)</div>${durusHtml}</div>
+      <div class="chart-card"><div class="chart-title">En Çok Fire Veren Ürünler</div>${fireHtml}</div>
+    </div>
+    <div class="footnote">Bu pano, modüllere girilen verilerden otomatik hesaplanır; ayrı bir veri girişi gerektirmez.</div>`;
+}
+
+function currentTitle() {
+  if (state.activeModule === "dashboard") return "Pano";
+  if (state.activeModule === "terminal") return "El Terminali";
+  if (state.activeModule === "etiket") return "Etiket Yazdır";
+  if (state.activeModule === "yetki") return "Yetkiler";
+  if (state.activeModule === "analiz") return "Analiz ve Değerlendirme";
+  if (state.activeModule === "standartlar") return "Standartlar ve Metotlar";
+  return MODULES[state.activeModule].label;
+}
+
+async function render() {
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <div class="sidebar">
+      <div class="brand">
+        <div class="logo">EY</div>
+        <div><div class="title">Entegre Yönetim Sistemi</div><div class="sub">v1.2 — Paylaşımlı</div></div>
+      </div>
+      <div class="navsection"><div class="navsection-label">Modüller</div>${renderNav()}</div>
+    </div>
+    <div class="main-wrap">
+      <div class="topbar">
+        <div class="breadcrumb">Entegre Yönetim Sistemi <b>/ ${currentTitle()}</b></div>
+        <div class="topbar-right"><span class="synctag" id="sync-tag"><span class="dot"></span> Yükleniyor…</span></div>
+      </div>
+      <div class="main" id="main-content"><div class="loading-box">Yükleniyor…</div></div>
+    </div>`;
+  attachNavEvents();
+
+  let html;
+  if (state.activeModule === "dashboard") html = await renderDashboard();
+  else if (state.activeModule === "terminal") { term.fresh = true; html = await renderTerminal(); }
+  else if (state.activeModule === "etiket") html = await renderEtiket();
+  else if (state.activeModule === "yetki") html = await renderYetki();
+  else if (state.activeModule === "analiz") html = await renderAnaliz();
+  else if (state.activeModule === "standartlar") html = renderStandartlar();
+  else html = await renderModulePage(state.activeModule);
+
+  document.getElementById("main-content").innerHTML = html;
+  setSyncing(false);
+  attachContentEvents();
+  if (state.activeModule === "terminal") attachTerminalEvents();
+  if (state.activeModule === "etiket") attachEtiketEvents();
+  if (state.activeModule === "yetki" && rolu() === "admin") attachYetkiEvents();
+}
+
+function attachNavEvents() {
+  document.querySelectorAll("[data-nav]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.activeModule = btn.getAttribute("data-nav");
+      state.activeSub = null; state.showForm = false; state.formError = ""; state.standartDetay = null; state.moduleSearchText = "";
+      render();
+    });
+  });
+}
+
+function attachContentEvents() {
+  document.querySelectorAll("[data-standarttab]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.standartlarTab = btn.getAttribute("data-standarttab");
+      state.standartDetay = null;
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-opendetay]").forEach(row => {
+    row.addEventListener("click", () => {
+      state.standartDetay = { tip: row.getAttribute("data-opendetay"), key: row.getAttribute("data-key") };
+      render();
+    });
+  });
+
+  const geriLink = document.getElementById("detay-geri");
+  if (geriLink) {
+    geriLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      state.standartDetay = null;
+      render();
+    });
+  }
+
+  const docIndir = document.getElementById("doc-indir");
+  if (docIndir) {
+    docIndir.addEventListener("click", () => {
+      const doc = buildTrainingDoc(state.standartDetay.tip, state.standartDetay.key);
+      const html = trainingDocHtml(doc);
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = doc.title.replace(/[^\wÇĞİÖŞÜçğıöşü\s-]/g, "").replace(/\s+/g, "_") + ".html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  const docYazdir = document.getElementById("doc-yazdir");
+  if (docYazdir) {
+    docYazdir.addEventListener("click", () => {
+      const doc = buildTrainingDoc(state.standartDetay.tip, state.standartDetay.key);
+      const html = trainingDocHtml(doc);
+      const win = window.open("", "_blank");
+      win.document.write(html);
+      win.document.close();
+      setTimeout(() => win.print(), 300);
+    });
+  }
+
+  const standartSearch = document.getElementById("standart-search");
+  if (standartSearch) {
+    standartSearch.addEventListener("input", () => {
+      state.standartlarFilter = standartSearch.value;
+      render();
+      setTimeout(() => {
+        const el = document.getElementById("standart-search");
+        if (el) { el.focus(); el.selectionStart = el.selectionEnd = el.value.length; }
+      }, 0);
+    });
+  }
+
+  document.querySelectorAll("[data-subtab]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.activeSub = btn.getAttribute("data-subtab");
+      state.showForm = false; state.formError = ""; state.moduleSearchText = "";
+      render();
+    });
+  });
+
+  const moduleSearch = document.getElementById("module-search");
+  if (moduleSearch) {
+    moduleSearch.addEventListener("input", () => {
+      state.moduleSearchText = moduleSearch.value;
+      render();
+      setTimeout(() => {
+        const el = document.getElementById("module-search");
+        if (el) { el.focus(); el.selectionStart = el.selectionEnd = el.value.length; }
+      }, 0);
+    });
+  }
+
+  const toggleBtn = document.getElementById("toggle-form");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      state.showForm = !state.showForm; state.formError = "";
+      render();
+    });
+  }
+
+  const form = document.getElementById("entry-form");
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const moduleId = form.getAttribute("data-module");
+      const subId = form.getAttribute("data-sub");
+      const sub = MODULES[moduleId].subs[subId];
+      const fd = new FormData(form);
+      const record = { _id: newUuid(), _createdAt: new Date().toISOString() };
+      const MAX_FILE_BYTES = 3.5 * 1024 * 1024;
+      for (const f of fullFields(sub)) {
+        if (f.type === "file") {
+          const file = fd.get(f.key);
+          if (file && file instanceof File && file.size > 0) {
+            if (file.size > MAX_FILE_BYTES) {
+              state.formError = `"${file.name}" çok büyük (${formatFileSize(file.size)}). En fazla ${formatFileSize(MAX_FILE_BYTES)} boyutunda dosya yükleyebilirsiniz.`;
+              render();
+              return;
+            }
+            try {
+              record[f.key] = await readFileAsDataURL(file);
+              record[f.key + "_adi"] = file.name;
+              record[f.key + "_boyut"] = file.size;
+              record[f.key + "_tipi"] = file.type;
+            } catch (err) {
+              state.formError = "Dosya okunurken bir hata oluştu, tekrar deneyin.";
+              render();
+              return;
+            }
+          } else {
+            record[f.key] = "";
+          }
+        } else {
+          record[f.key] = (fd.get(f.key) || "").toString().trim();
+        }
+      }
+      const missing = sub.fields.find(f => f.required && !record[f.key]);
+      if (missing) { state.formError = `"${missing.label}" alanı zorunlu.`; render(); return; }
+      const records = await loadRecords(moduleId, subId);
+      records.unshift(record);
+      const ok = await saveRecords(moduleId, subId, records);
+      if (!ok) {
+        records.shift();
+        state.formError = "Kayıt başarısız oldu — depolama sınırına ulaşılmış olabilir. Daha küçük bir dosya deneyin veya bu başlıktaki eski bir kaydı silip tekrar deneyin.";
+        render();
+        return;
+      }
+      state.showForm = false; state.formError = "";
+      render();
+    });
+  }
+
+  document.querySelectorAll("[data-del]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const moduleId = btn.getAttribute("data-module");
+      const subId = btn.getAttribute("data-sub");
+      const id = btn.getAttribute("data-del");
+      const records = (await loadRecords(moduleId, subId)).filter(r => r._id !== id);
+      await saveRecords(moduleId, subId, records);
+      render();
+    });
+  });
+}
+
+/* =========================================================================
+   EL TERMİNALİ — barkod okutarak stok giriş / çıkış / sayım
+   Klavye gibi davranan (keyboard wedge) tarayıcılar odaklı kutuya kodu yazıp Enter gönderir.
+   ========================================================================= */
+const term = { mode: "giris", item: null, msg: "", kind: "ok", undoId: null, hmsg: "", keepFocus: null, f: { sKod: "", hKod: "", hIslem: "haric", hTarih: "tum", sDurum: "tum", sifir: false }, durum: "Uygun", hedef: "Ret", note: "" };
+const TERM_MODES = {
+  giris: { label: "Giriş", ic: "⬇", color: "#1E8E5A" },
+  cikis: { label: "Çıkış", ic: "⬆", color: "#C0392B" },
+  sayim: { label: "Sayım", ic: "✔", color: "#0B5ED7" },
+  durum: { label: "Durum Değiştir", ic: "⇄", color: "#8E44AD" },
+};
+const DURUMLAR = { "Uygun": { c: "#1E8E5A" }, "Onay Bekliyor": { c: "#D68910" }, "Ret": { c: "#C0392B" } };
+const foldKod = v => String(v || "").trim().toLocaleLowerCase("tr").replace(/[çğıöşü]/g, c => ({ "ç": "c", "ğ": "g", "ı": "i", "ö": "o", "ş": "s", "ü": "u" })[c]);
+const dzNum = v => (v ? `<b>${v}</b>` : '<span class="term-sub">–</span>');
+function durumChips(attr, secili) {
+  return `<div class="durum-chips">${Object.entries(DURUMLAR).map(([d, v]) => `<button class="durum-chip ${secili === d ? "on" : ""}" ${attr}="${d}" style="--c:${v.c}">${d}</button>`).join("")}</div>`;
+}
+let termAudio = null;
+function termFeedback(ok) {
+  try { if (navigator.vibrate) navigator.vibrate(ok ? 80 : [120, 60, 120]); } catch (e) {}
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    termAudio = termAudio || new AC();
+    const o = termAudio.createOscillator(), g = termAudio.createGain();
+    o.frequency.value = ok ? 1100 : 300; g.gain.value = 0.08;
+    o.connect(g); g.connect(termAudio.destination);
+    o.start(); o.stop(termAudio.currentTime + (ok ? 0.12 : 0.35));
+  } catch (e) {}
+}
+
+function termDT(iso, fallback) {
+  const d = iso ? new Date(iso) : null;
+  if (!d || isNaN(d)) return fallback || "—";
+  return d.toLocaleString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+async function renderTerminal() {
+  if (window.__cloud && term.fresh) { term.fresh = false; cloudInvalidate(); }
+  const [hareketAll, stok] = await Promise.all([loadRecords("stok", "hareket"), loadRecords("stok", "stokTakip")]);
+  const f = term.f, nz = v => String(v || "").toLocaleLowerCase("tr");
+  const bugun = new Date(); bugun.setHours(0, 0, 0, 0);
+  const limit = f.hTarih === "bugun" ? bugun.getTime() : Date.now() - 7 * 864e5;
+  const hareket = hareketAll.filter(h => {
+    if (f.hIslem === "haric" ? h.tip === "Çıkış" : (f.hIslem !== "tum" && h.tip !== f.hIslem)) return false;
+    if (f.hKod && !nz(h.malzemeKodu).includes(nz(f.hKod))) return false;
+    if (f.hTarih !== "tum" && !(new Date(h._createdAt).getTime() >= limit)) return false;
+    return true;
+  }).slice(0, 40);
+  const grup = new Map();
+  stok.forEach(r => {
+    const k = foldKod(r.malzemeKodu);
+    let g = grup.get(k);
+    if (!g) { g = { kod: r.malzemeKodu, aciklama: r.aciklama, birim: r.birim, "Uygun": 0, "Onay Bekliyor": 0, "Ret": 0, son: "" }; grup.set(k, g); }
+    const d = DURUMLAR[r.durum] ? r.durum : "Uygun";
+    g[d] += Number(r.miktar) || 0;
+    if (!g.aciklama && r.aciklama) g.aciklama = r.aciklama;
+    if (!g.birim && r.birim) g.birim = r.birim;
+    if ((r._sonHareket || "") > g.son) g.son = r._sonHareket;
+  });
+  const tum = [...grup.values()].sort((x, y) => ((y.Ret > 0) - (x.Ret > 0)) || ((y["Onay Bekliyor"] > 0) - (x["Onay Bekliyor"] > 0)) || String(x.kod).localeCompare(String(y.kod), "tr"));
+  const tot = { "Uygun": 0, "Onay Bekliyor": 0, "Ret": 0 };
+  tum.forEach(g => Object.keys(tot).forEach(d => { tot[d] += g[d]; }));
+  const toplamG = g => g["Uygun"] + g["Onay Bekliyor"] + g["Ret"];
+  const gorunur = f.sifir ? tum : tum.filter(g => toplamG(g) > 0);
+  const stokF = gorunur.filter(g => (!f.sKod || nz(g.kod).includes(nz(f.sKod)) || nz(g.aciklama).includes(nz(f.sKod)))
+    && (f.sDurum === "tum" || (f.sDurum === "ret" && g.Ret > 0) || (f.sDurum === "bek" && g["Onay Bekliyor"] > 0) || (f.sDurum === "sorunlu" && (g.Ret > 0 || g["Onay Bekliyor"] > 0))));
+  const rol = rolu(), isAdmin = rol === "admin", canScan = rol !== "izleyici";
+  if (term.mode === "durum" && !isAdmin) term.mode = "giris";
+  const m = TERM_MODES[term.mode], it = term.item, dmode = term.mode === "durum";
+  if (dmode && term.hedef === term.durum) term.hedef = Object.keys(DURUMLAR).find(d => d !== term.durum);
+  const needNote = (dmode && term.hedef === "Ret") || (term.mode === "giris" && term.durum === "Ret");
+  const dz = it ? (it.durumlar || { "Uygun": 0, "Onay Bekliyor": 0, "Ret": 0 }) : null;
+  const left = `
+  <div class="term">
+    <div class="term-modes">${Object.entries(TERM_MODES).filter(([k]) => k !== "durum" || isAdmin).map(([k, v]) =>
+      `<button class="term-mode ${term.mode === k ? "on" : ""}" data-tmode="${k}" style="--c:${v.color}">${v.ic} ${v.label}</button>`).join("")}</div>
+    <label class="term-lbl">${dmode ? "Nereden (kaynak durum)" : "Stok durumu"}</label>${durumChips("data-tdurum", term.durum)}
+    ${dmode ? `<label class="term-lbl">Nereye (hedef durum)</label>${durumChips("data-thedef", term.hedef)}` : ""}
+    <label class="term-lbl">Barkod / Malzeme Kodu</label>
+    <input id="term-scan" class="term-input mono" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Okutun veya yazıp Enter'a basın" ${hwMode() ? 'inputmode="none"' : ""} />
+    <button id="term-cam" class="term-cam">📷 Kamera ile oku</button>
+    <button id="term-bfoto" class="term-cam" style="background:#1F4E79">🖼 Barkodu fotoğraf çekerek oku</button>
+    <input id="term-bfoto-file" type="file" accept="image/*" capture="environment" style="display:none" />
+    <button id="term-ktest" class="term-undo" style="margin-top:8px;width:100%;padding:10px">🔧 Kamera testi (sorun giderme)</button>
+    <button id="term-ocr" class="term-cam" style="background:#374151">🔤 Etiket fotoğrafı oku (barkodsuz etiket)</button>
+    <input id="term-ocr-file" type="file" accept="image/*" capture="environment" style="display:none" />
+    ${isCoarse() ? `<label class="term-sub" style="display:block;margin-top:8px"><input type="checkbox" id="term-hw" ${hwMode() ? "checked" : ""} /> Donanımlı barkod okuyucu kullanıyorum (ekran klavyesini açma)</label>` : ""}
+    ${term.msg ? `<div class="term-msg ${term.kind}">${esc(term.msg)}</div>` : ""}
+    ${term.dupRaw && isAdmin ? '<button id="term-dup-ok" class="term-undo" style="margin-top:8px">Yetkili olarak yine de işle</button>' : ""}
+    ${it ? `<div class="term-card">
+      <div class="mono term-code">${esc(it.malzemeKodu)}</div>
+      <div>${esc(it.aciklama || (it._new ? "Yeni malzeme (kayıtlı değil)" : "—"))}</div>
+      ${(term.mode === "giris" || term.mode === "cikis") ? `<div class="term-sub" style="margin:2px 0 4px">${term.etiketId ? "🔖 Etiket kontrolü açık: bu etiket bir kez okutulabilir." : "ℹ️ Bu barkodda etiket numarası yok: tekrar okutma engellenmez."}</div>` : ""}
+      <div class="term-stock">${Object.keys(DURUMLAR).map(d => `${d}: <b style="color:${DURUMLAR[d].c}">${dz[d] || 0}</b>`).join(" · ")} ${esc(it.birim || "")}</div>
+      <label class="term-lbl">${term.mode === "sayim" ? `Sayılan miktar (${term.durum})` : "Miktar"}</label>
+      <input id="term-qty" class="term-input" type="number" inputmode="decimal" min="0" step="any" value="${term.mode === "sayim" ? "" : (term.preQty || 1)}" />
+      <label class="term-lbl">Açıklama ${needNote ? "(zorunlu — ret nedeni)" : "(isteğe bağlı)"}</label>
+      <input id="term-note" class="term-input" style="font-size:16px;padding:10px" autocomplete="off" placeholder="${needNote ? "Ret nedeni / açıklama" : "Not"}" value="${esc(term.note)}" />
+      <button id="term-ok" class="term-confirm" style="background:${dmode ? DURUMLAR[term.hedef].c : m.color}">${dmode ? `${esc(term.durum)} → ${esc(term.hedef)} aktar` : `${m.label} Onayla`}</button>
+      <button id="term-cancel" class="term-cancel">İptal</button>
+    </div>` : ""}
+    ${window.__localMode ? `<div class="term-backup"><button class="term-undo" id="bk-al">⬇ Yedek indir</button> <button class="term-undo" id="bk-yukle">⬆ Yedekten yükle</button><input type="file" id="bk-file" accept=".json" style="display:none" /></div>` : ""}
+  </div>`;
+  const stokRows = stokF.map(g => `<tr class="pick ${g.Ret > 0 ? "satir-ret" : ""}" data-pick="${esc(g.kod)}"><td class="mono">${esc(g.kod)}</td><td>${esc(g.aciklama)}</td>
+      <td class="num dz uyg">${dzNum(g["Uygun"])}</td><td class="num dz bek">${dzNum(g["Onay Bekliyor"])}</td><td class="num dz ret">${dzNum(g["Ret"])}</td>
+      <td class="num"><b>${g["Uygun"] + g["Onay Bekliyor"] + g["Ret"]}</b></td><td>${esc(g.birim)}</td><td style="white-space:nowrap">${esc(termDT(g.son))}</td></tr>`).join("")
+    || '<tr><td colspan="8" class="term-sub">Gösterilecek stok kaydı yok.</td></tr>';
+  const hrRows = hareket.map(h => `<tr>
+      <td style="white-space:nowrap">${esc(termDT(h._createdAt, h.tarih))}</td><td class="mono">${esc(h.malzemeKodu)}</td><td>${esc(h.tip)}</td>
+      <td style="white-space:nowrap" class="dz ${h.durum === "Ret" ? "ret" : h.durum === "Onay Bekliyor" ? "bek" : "uyg"}"><b>${esc(h.durum || "Uygun")}${h.hedefDurum ? " → " + esc(h.hedefDurum) : ""}</b></td>
+      <td class="num">${esc(h.miktar)}</td><td class="num">${esc(h.yeniStok)}</td><td>${esc(h.aciklama || "")}</td><td class="term-sub">${esc(String(h.kullanici || "").split("@")[0])}</td>
+      <td class="act">${!isAdmin ? "" : term.undoId === h._id
+        ? `<button class="term-undo yes" data-undo-yes="${h._id}">Evet, geri al</button> <button class="term-undo" data-undo-no="1">Vazgeç</button>`
+        : `<button class="term-undo" data-undo="${h._id}">Geri Al</button>`}</td></tr>`).join("")
+    || '<tr><td colspan="9" class="term-sub">Gösterilecek hareket yok.</td></tr>';
+  const opt = (arr, cur) => arr.map(([v, l]) => `<option value="${v}" ${cur === v ? "selected" : ""}>${l}</option>`).join("");
+  return `<div class="term-wrap"><div class="term-left">${canScan ? left : '<div class="term"><div class="term-msg warn">Sadece görüntüleme yetkiniz var. Okutma ve işlem yapma yetkisi için yetkili kullanıcıya başvurun.</div></div>'}</div><div class="term-right">
+    <div class="erp-panel"><div class="erp-ptitle">Stok Durumu <span>${stokF.length}/${gorunur.length} kalem — satıra tıklayınca seçilir</span>${window.__cloud ? ' <button class="term-undo" id="term-refresh">↻ Yenile</button>' : ""}</div>
+      <div class="dsum"><span style="background:#E6F6EE;color:#1E7A4D">Uygun ${tot["Uygun"]}</span><span style="background:#FFF4DE;color:#9A6200">Onay bekleyen ${tot["Onay Bekliyor"]}</span><span style="background:#FCEAEA;color:#B02A1E">Ret ${tot["Ret"]}</span></div>
+      <div class="erp-filter"><input id="f-skod" placeholder="Kod / açıklama ara…" value="${esc(f.sKod)}" />
+        <select id="f-sdurum">${opt([["tum", "Tüm stoklar"], ["sorunlu", "Sorunlu (ret + onay bekleyen)"], ["ret", "Sadece ret var"], ["bek", "Sadece onay bekleyen var"]], f.sDurum)}</select>
+        <label class="term-sub" style="display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" id="f-sifir" ${f.sifir ? "checked" : ""} /> Sıfır stokluları göster</label></div>
+      <div class="erp-scroll"><table class="erp-table"><thead><tr><th>Malzeme Kodu</th><th>Açıklama</th><th class="num">Uygun</th><th class="num">Onay Bekl.</th><th class="num">Ret</th><th class="num">Toplam</th><th>Birim</th><th>Son Hareket</th></tr></thead><tbody>${stokRows}</tbody></table></div></div>
+    <div class="erp-panel"><div class="erp-ptitle">Son Hareketler <span>${hareket.length} kayıt</span></div>
+      <div class="erp-filter"><input id="f-hkod" placeholder="Malzeme kodu ara…" value="${esc(f.hKod)}" />
+        <select id="f-hislem">${opt([["haric", "Çıkış hariç"], ["tum", "Tüm işlemler"], ["Giriş", "Giriş"], ["Çıkış", "Çıkış"], ["Sayım", "Sayım"], ["Durum Değişimi", "Durum değişimi"]], f.hIslem)}</select>
+        <select id="f-htarih">${opt([["tum", "Tüm tarihler"], ["bugun", "Bugün"], ["hafta", "Son 7 gün"]], f.hTarih)}</select></div>
+      ${term.hmsg ? `<div class="term-msg err" style="margin:8px">${esc(term.hmsg)}</div>` : ""}
+      <div class="erp-scroll"><table class="erp-table"><thead><tr><th>Tarih / Saat</th><th>Malzeme</th><th>İşlem</th><th>Durum</th><th class="num">Miktar</th><th class="num">Yeni Stok</th><th>Açıklama</th><th>Kullanıcı</th><th></th></tr></thead><tbody>${hrRows}</tbody></table></div></div>
+  </div></div>`;
+}
+
+function yedekAl() {
+  const o = {};
+  for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith("erp:")) o[k] = localStorage.getItem(k); }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(o)], { type: "application/json" }));
+  a.download = "erp-yedek-" + new Date().toISOString().slice(0, 10) + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  term.msg = "Yedek dosyası indirildi."; term.kind = "ok"; refreshTerminal();
+}
+function yedekYukle(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const o = JSON.parse(r.result);
+      Object.keys(o).forEach(k => { if (k.startsWith("erp:")) localStorage.setItem(k, o[k]); });
+      Object.keys(cache).forEach(k => delete cache[k]);
+      term.msg = "Yedek yüklendi."; term.kind = "ok";
+    } catch (e) { term.msg = "Yedek dosyası okunamadı."; term.kind = "err"; }
+    refreshTerminal();
+  };
+  r.readAsText(file);
+}
+
+async function refreshTerminal(fresh) {
+  if (fresh) term.fresh = true;
+  const el = document.getElementById("main-content");
+  if (!el) return;
+  el.innerHTML = await renderTerminal();
+  attachTerminalEvents();
+}
+
+function attachTerminalEvents() {
+  const scan = document.getElementById("term-scan");
+  const qty = document.getElementById("term-qty");
+  document.querySelectorAll("[data-tmode]").forEach(b => b.addEventListener("click", () => {
+    term.mode = b.getAttribute("data-tmode"); term.item = null; term.msg = ""; refreshTerminal();
+  }));
+  if (scan) scan.addEventListener("keydown", e => {
+    if (e.key !== "Enter" && e.key !== "Tab") return;
+    e.preventDefault();
+    termLookup(scan.value.trim());
+  });
+  if (qty) qty.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); termConfirm(); } });
+  document.querySelectorAll("[data-undo]").forEach(b => b.addEventListener("click", () => { term.undoId = b.getAttribute("data-undo"); refreshTerminal(); }));
+  document.querySelectorAll("[data-undo-no]").forEach(b => b.addEventListener("click", () => { term.undoId = null; refreshTerminal(); }));
+  document.querySelectorAll("[data-undo-yes]").forEach(b => b.addEventListener("click", () => termUndo(b.getAttribute("data-undo-yes"))));
+  const bkA = document.getElementById("bk-al"), bkY = document.getElementById("bk-yukle"), bkF = document.getElementById("bk-file");
+  if (bkA) bkA.addEventListener("click", yedekAl);
+  if (bkY) bkY.addEventListener("click", () => bkF.click());
+  if (bkF) bkF.addEventListener("change", () => yedekYukle(bkF.files[0]));
+  const ob = document.getElementById("term-ocr"), ofl = document.getElementById("term-ocr-file");
+  if (ob && ofl) {
+    ob.addEventListener("click", () => { ofl.value = ""; ofl.click(); });
+    ofl.addEventListener("change", () => { if (ofl.files && ofl.files[0]) ocrEtiket(ofl.files[0]); });
+  }
+  const bf = document.getElementById("term-bfoto"), bff = document.getElementById("term-bfoto-file");
+  if (bf && bff) {
+    bf.addEventListener("click", () => { bff.value = ""; bff.click(); });
+    bff.addEventListener("change", () => { if (bff.files && bff.files[0]) barkodFoto(bff.files[0]); });
+  }
+  const kt = document.getElementById("term-ktest");
+  if (kt) kt.addEventListener("click", kameraTesti);
+  const dk = document.getElementById("term-dup-ok");
+  if (dk) dk.addEventListener("click", () => { term.skipDup = term.dupRaw; term.lastAt = 0; termLookup(term.dupRaw); });
+  const cb = document.getElementById("term-cam");
+  if (cb) cb.addEventListener("click", camOpen);
+  const hw = document.getElementById("term-hw");
+  if (hw) hw.addEventListener("change", () => { try { localStorage.setItem("erp_hw", hw.checked ? "1" : "0"); } catch (e) {} refreshTerminal(); });
+  const rf = document.getElementById("term-refresh");
+  if (rf) rf.addEventListener("click", () => refreshTerminal(true));
+  const bind = (id, key, ev) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener(ev, () => { term.f[key] = el.value; term.hmsg = ""; if (ev === "input") term.keepFocus = id; refreshTerminal(); });
+  };
+  bind("f-skod", "sKod", "input"); bind("f-hkod", "hKod", "input");
+  bind("f-hislem", "hIslem", "change"); bind("f-htarih", "hTarih", "change");
+  document.querySelectorAll("[data-pick]").forEach(tr => tr.addEventListener("click", () => termLookup(tr.getAttribute("data-pick"))));
+  bind("f-sdurum", "sDurum", "change");
+  const fz = document.getElementById("f-sifir");
+  if (fz) fz.addEventListener("change", () => { term.f.sifir = fz.checked; refreshTerminal(); });
+  const other = d => Object.keys(DURUMLAR).find(x => x !== d);
+  document.querySelectorAll("[data-tdurum]").forEach(b => b.addEventListener("click", () => { term.durum = b.getAttribute("data-tdurum"); if (term.hedef === term.durum) term.hedef = other(term.durum); refreshTerminal(); }));
+  document.querySelectorAll("[data-thedef]").forEach(b => b.addEventListener("click", () => { term.hedef = b.getAttribute("data-thedef"); if (term.hedef === term.durum) term.durum = other(term.hedef); refreshTerminal(); }));
+  const nt = document.getElementById("term-note");
+  if (nt) { nt.addEventListener("input", () => { term.note = nt.value; }); nt.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); termConfirm(); } }); }
+  const ok = document.getElementById("term-ok"), cancel = document.getElementById("term-cancel");
+  if (ok) ok.addEventListener("click", termConfirm);
+  if (cancel) cancel.addEventListener("click", () => { term.item = null; term.msg = ""; refreshTerminal(); });
+  if (term.keepFocus) {
+    const k = document.getElementById(term.keepFocus); term.keepFocus = null;
+    if (k) { k.focus(); try { k.setSelectionRange(k.value.length, k.value.length); } catch (e) {} }
+    return;
+  }
+  setTimeout(() => { const f = qty || ((isCoarse() && !hwMode()) ? null : scan); if (f) { f.focus(); if (qty) qty.select(); } }, 50);
+}
+
+/* Sevk etiketi barkodu (örnek): 20742 | 5 | 47021998 | 000064 | 161126 | ... → malzeme kodu, adet, tarih (ggaayy) */
+/* Tanınmayan uzun rakam dizisi = büyük olasılıkla eksik/yanlış okunmuş etiket barkodu */
+function barkodSuphe(text) { const t = String(text || "").trim(); return /^\d{15,}$/.test(t) && !parseEtiket(t); }
+function parseEtiket(raw) {
+  const fd = d => (+d.slice(0, 2) >= 1 && +d.slice(0, 2) <= 31 && +d.slice(2, 4) >= 1 && +d.slice(2, 4) <= 12) ? `${d.slice(0, 2)}.${d.slice(2, 4)}.20${d.slice(4, 6)}` : "—";
+  const uf = /^UF(\d{12})(\d{6})(\d{6})(\d{6})(.+)$/i.exec(String(raw || "").trim());
+  if (uf && parseInt(uf[2], 10) > 0) return { kimlik: true, kod: uf[5].trim(), adet: parseInt(uf[2], 10), tarih: `üretim ${fd(uf[3])} · sevk ${fd(uf[4])}` };
+  const u = /^UE(\d{6})(\d{6})(\d{6})(.+)$/i.exec(String(raw || "").trim());
+  if (u) {
+    const adet = parseInt(u[1], 10);
+    const f = d => (+d.slice(0, 2) >= 1 && +d.slice(0, 2) <= 31 && +d.slice(2, 4) >= 1 && +d.slice(2, 4) <= 12) ? `${d.slice(0, 2)}.${d.slice(2, 4)}.20${d.slice(4, 6)}` : "—";
+    if (adet > 0) return { kimlik: true, kod: u[4].trim(), adet, tarih: `üretim ${f(u[2])} · sevk ${f(u[3])}` };
+  }
+  const m = /^(\d{5})(\d)(\d{8})(\d{6})(\d{6})(\d*)$/.exec(String(raw || "").trim());
+  if (!m) return null;
+  const gg = +m[5].slice(0, 2), aa = +m[5].slice(2, 4), yy = m[5].slice(4, 6);
+  if (gg < 1 || gg > 31 || aa < 1 || aa > 12) return null;
+  const adet = parseInt(m[4], 10);
+  if (!adet) return null;
+  return { kimlik: true, kod: m[3], adet, tarih: `${m[5].slice(0, 2)}.${m[5].slice(2, 4)}.20${yy}` };
+}
+
+async function termLookup(code) {
+  if (!code) return;
+  const nowT = Date.now();
+  if (!term.ocrFlag && term.lastRaw === code && nowT - (term.lastAt || 0) < 2500) return;   // aynı barkodun çift okunması
+  term.lastRaw = code; term.lastAt = nowT; term.dupRaw = "";
+  if (!term.ocrFlag && barkodSuphe(code)) {
+    term.msg = `Okunan "${code}" tanınan bir etiket biçimi değil, malzeme kodu olamaz. Barkod eksik okunmuş olabilir: etiketi tekrar okutun.`;
+    term.kind = "err"; term.item = null; term.preQty = null; term.etiketId = ""; termFeedback(false); refreshTerminal(); return;
+  }
+  const ocr = term.ocrFlag; term.ocrFlag = false;
+  const rawCode = code;
+  const pe = parseEtiket(code);
+  term.etiketId = (pe && pe.kimlik && !ocr) ? rawCode : "";
+  if (pe) { code = pe.kod; term.preQty = pe.adet; term.etiket = `${ocr ? "FOTOĞRAFTAN OKUNDU — kodu ve adedi mutlaka kontrol edin. " : ""}Etiket okundu: ${pe.kod} · ${pe.adet} adet · ${pe.tarih}. Kontrol edip onaylayın.`; }
+  else { term.preQty = null; term.etiket = ""; }
+  if (window.__cloud) delete cache[recKey("stok", "stokTakip")];
+  const stok = await loadRecords("stok", "stokTakip");
+  const rows = stok.filter(r => foldKod(r.malzemeKodu) === foldKod(code));
+  term.note = "";
+  if (rows.length) {
+    const dz = { "Uygun": 0, "Onay Bekliyor": 0, "Ret": 0 };
+    rows.forEach(r => { const d = DURUMLAR[r.durum] ? r.durum : "Uygun"; dz[d] += Number(r.miktar) || 0; });
+    term.item = { malzemeKodu: rows[0].malzemeKodu, aciklama: (rows.find(r => r.aciklama) || {}).aciklama || "", birim: rows[0].birim || "", durumlar: dz };
+    term.msg = term.etiket; term.kind = "ok"; termFeedback(true);
+  } else if (term.mode === "giris") {
+    term.item = { malzemeKodu: code, _new: true };
+    term.msg = (term.etiket ? term.etiket + " " : "") + "Kayıtlı olmayan kod — onaylarsanız yeni malzeme olarak eklenir."; term.kind = "warn"; termFeedback(false);
+  } else {
+    term.item = null; term.msg = `"${code}" stok kaydında bulunamadı.`; term.kind = "err"; termFeedback(false);
+  }
+  const atla = term.skipDup === rawCode; term.skipDup = "";
+  if (atla && term.item) { term.etiketId = ""; term.msg = "Yetkili onayıyla işleniyor: bu etiket mükerrer olarak kaydedilecek (etiket numarası bağlanmaz). " + (term.msg || ""); term.kind = "warn"; }
+  else if (term.etiketId && term.item && window.__cloud && (term.mode === "giris" || term.mode === "cikis")) {
+    try {
+      const rows = await sbFetch("hareket?select=created_at,kullanici&limit=1&etiket=eq." + encodeURIComponent(term.etiketId) + "&tip=eq." + encodeURIComponent(TERM_MODES[term.mode].label));
+      if (rows && rows.length) {
+        const kim = String(rows[0].kullanici || "?").split("@")[0], ne = termDT(rows[0].created_at);
+        term.msg = `BU ETİKET DAHA ÖNCE OKUTULDU (${ne}, ${kim}). İşlem yapılamaz.`; term.kind = "err";
+        term.dupRaw = rolu() === "admin" ? rawCode : "";
+        term.item = null; term.preQty = null; term.etiketId = "";
+        termFeedback(false);
+      }
+    } catch (e) { /* kontrol yapılamazsa kayıt sırasında sunucu yine engeller */ }
+  }
+  if (ocr && term.item && term.kind !== "err") term.kind = "warn";
+  refreshTerminal();
+}
+
+async function termConfirm() {
+  const it = term.item;
+  if (!it) return;
+  const fail = (msg) => { term.msg = msg; term.kind = "err"; termFeedback(false); return refreshTerminal(); };
+  const q = parseFloat(document.getElementById("term-qty").value);
+  if (isNaN(q) || q < 0 || (term.mode !== "sayim" && q <= 0)) return fail("Geçerli bir miktar girin.");
+  if (window.__cloud) {
+    if (term.busy) return;
+    term.busy = true;
+    try {
+      const note = ((document.getElementById("term-note") || {}).value || "").trim();
+      if (term.mode === "durum") {
+        if (term.hedef === "Ret" && !note) throw new Error("Ret için açıklama (ret nedeni) yazmalısınız.");
+        await cloudRpc("durum_degistir", { p_kod: it.malzemeKodu, p_kaynak: term.durum, p_hedef: term.hedef, p_miktar: q, p_aciklama: note });
+        term.msg = `${it.malzemeKodu}: ${q} adet ${term.durum} → ${term.hedef} aktarıldı`;
+      } else {
+        if (term.mode === "giris" && term.durum === "Ret" && !note) throw new Error("Ret girişi için açıklama (ret nedeni) yazmalısınız.");
+        const r = await cloudRpc("stok_hareket", { p_kod: it.malzemeKodu, p_tip: TERM_MODES[term.mode].label, p_miktar: q, p_durum: term.durum, p_aciklama: note, p_etiket: (term.mode === "giris" || term.mode === "cikis") ? (term.etiketId || null) : null });
+        term.msg = `${r.malzeme_kodu}: ${TERM_MODES[term.mode].label} ${q} (${term.durum}) — yeni ${term.durum} stoğu ${r.miktar}`;
+      }
+      cloudInvalidate();
+      term.item = null; term.kind = "ok"; term.note = ""; term.etiketId = "";
+      termFeedback(true); refreshTerminal(true);
+    } catch (e) { fail(e.message); }
+    finally { term.busy = false; }
+    return;
+  }
+
+  const stok = await loadCopy("stok", "stokTakip");
+  const stokOnce = JSON.parse(JSON.stringify(stok));
+  let rec = it._id ? stok.find(r => r._id === it._id) : null;
+  const onceki = rec ? (Number(rec.miktar) || 0) : 0;
+  let yeni;
+  if (term.mode === "giris") yeni = onceki + q;
+  else if (term.mode === "cikis") {
+    if (q > onceki) return fail(`Stokta yalnızca ${onceki} var, ${q} çıkış yapılamaz.`);
+    yeni = onceki - q;
+  } else yeni = q;
+  yeni = Math.round(yeni * 1e6) / 1e6;
+
+  const rid = () => Math.random().toString(36).slice(2, 10);
+  const now = new Date();
+  if (!rec) {
+    rec = { _id: rid(), _createdAt: now.toISOString(), malzemeKodu: it.malzemeKodu, aciklama: "", miktar: "", birim: "", ekLink: "", ekAciklama: "" };
+    stok.unshift(rec);
+  }
+  rec.miktar = String(yeni);
+  rec._sonHareket = now.toISOString();
+
+  const hareket = await loadCopy("stok", "hareket");
+  const sayimId = rid();
+  hareket.unshift({ _id: rid(), _createdAt: now.toISOString(), _onceki: onceki, _sayimId: term.mode === "sayim" ? sayimId : "", tarih: termDT(now.toISOString()),
+    malzemeKodu: rec.malzemeKodu, tip: TERM_MODES[term.mode].label, miktar: String(q), yeniStok: String(yeni) });
+
+  let okAll = await saveRecords("stok", "stokTakip", stok);
+  okAll = okAll && await saveRecords("stok", "hareket", hareket);
+  if (okAll && term.mode === "sayim") {
+    const sayim = await loadCopy("stok", "sayim");
+    sayim.unshift({ _id: sayimId, _createdAt: now.toISOString(),
+      sayimNo: "SYM-" + now.toISOString().slice(0, 10).replace(/-/g, "") + "-" + rid().slice(0, 3).toUpperCase(),
+      tarih: now.toISOString().slice(0, 10), malzemeKodu: rec.malzemeKodu,
+      sistemMiktar: String(onceki), sayilanMiktar: String(q), ekLink: "", ekAciklama: "" });
+    okAll = await saveRecords("stok", "sayim", sayim);
+  }
+  if (!okAll) { const et = saveErrText(); await saveRecords("stok", "stokTakip", stokOnce); return fail(et); }
+  term.item = null; term.kind = "ok";
+  term.msg = `${rec.malzemeKodu}: ${TERM_MODES[term.mode].label} ${q} — yeni stok ${yeni}`;
+  termFeedback(true);
+  refreshTerminal();
+}
+
+async function termUndo(id) {
+  term.undoId = null;
+  const fail = (msg) => { term.hmsg = msg; if (term.f.hIslem === "haric") term.f.hIslem = "tum"; termFeedback(false); return refreshTerminal(); };
+  if (window.__cloud) {
+    try {
+      await cloudRpc("hareket_geri_al", { p_id: id });
+      cloudInvalidate(); term.hmsg = ""; term.kind = "ok"; term.msg = "Hareket geri alındı.";
+      termFeedback(true); refreshTerminal(true);
+    } catch (e) { fail(e.message); }
+    return;
+  }
+  const hareket = await loadCopy("stok", "hareket");
+  const h = hareket.find(r => r._id === id);
+  if (!h) return refreshTerminal();
+  const norm = v => String(v || "").trim().toLocaleLowerCase("tr");
+  const stok = await loadCopy("stok", "stokTakip");
+  const stokOnce = JSON.parse(JSON.stringify(stok));
+  const rec = stok.find(r => norm(r.malzemeKodu) === norm(h.malzemeKodu));
+  const q = Number(h.miktar) || 0;
+  let yeni = null;
+  if (rec) {
+    const mevcut = Number(rec.miktar) || 0;
+    if (h.tip === "Giriş") {
+      yeni = mevcut - q;
+      if (yeni < 0) return fail(`Geri alınamaz: stok ${mevcut}, ${q} düşülürse eksiye iner. Önce sonraki çıkışları geri alın.`);
+    } else if (h.tip === "Çıkış") {
+      yeni = mevcut + q;
+    } else {
+      if (h._onceki === undefined) return fail("Bu sayım eski sürümde yapıldığı için otomatik geri alınamaz; Stok Takibi'nden miktarı elle düzeltin.");
+      const sonraki = hareket.find(r => norm(r.malzemeKodu) === norm(h.malzemeKodu));
+      if (!sonraki || sonraki._id !== id) return fail("Bu sayımdan sonra başka hareket var. Önce daha yeni hareketleri geri alın.");
+      yeni = Number(h._onceki) || 0;
+    }
+    yeni = Math.round(yeni * 1e6) / 1e6;
+    rec.miktar = String(yeni);
+    rec._sonHareket = new Date().toISOString();
+  }
+  const kalan = hareket.filter(r => r._id !== id);
+  // Terminalden otomatik açılmış (açıklaması boş), stoğu 0'a dönen ve başka hareketi kalmayan malzeme kaydı tamamen silinir
+  let stokSave = stok, kayitSilindi = false;
+  if (rec && yeni === 0 && !String(rec.aciklama || "").trim() && !String(rec.birim || "").trim()
+      && !kalan.some(r => norm(r.malzemeKodu) === norm(h.malzemeKodu))) {
+    stokSave = stok.filter(r => r !== rec); kayitSilindi = true;
+  }
+  let ok = await saveRecords("stok", "stokTakip", stokSave);
+  ok = ok && await saveRecords("stok", "hareket", kalan);
+  if (ok && h._sayimId) {
+    const sayim = (await loadCopy("stok", "sayim")).filter(r => r._id !== h._sayimId);
+    ok = await saveRecords("stok", "sayim", sayim);
+  }
+  if (!ok) { const et = saveErrText(); await saveRecords("stok", "stokTakip", stokOnce); return fail(et); }
+  term.hmsg = ""; term.kind = "ok";
+  term.msg = `${h.malzemeKodu}: ${h.tip} ${h.miktar} geri alındı` + (kayitSilindi ? " — malzeme kaydı da kaldırıldı" : (yeni !== null ? ` — stok ${yeni}` : ""));
+  termFeedback(true);
+  refreshTerminal();
+}
+
+/* =========================================================================
+   ETİKET YAZDIR — 100x70 mm iç stok etiketi, Code 128 barkod
+   ========================================================================= */
+const C128 = ["11011001100", "11001101100", "11001100110", "10010011000", "10010001100", "10001001100", "10011001000", "10011000100", "10001100100", "11001001000", "11001000100", "11000100100", "10110011100", "10011011100", "10011001110", "10111001100", "10011101100", "10011100110", "11001110010", "11001011100", "11001001110", "11011100100", "11001110100", "11101101110", "11101001100", "11100101100", "11100100110", "11101100100", "11100110100", "11100110010", "11011011000", "11011000110", "11000110110", "10100011000", "10001011000", "10001000110", "10110001000", "10001101000", "10001100010", "11010001000", "11000101000", "11000100010", "10110111000", "10110001110", "10001101110", "10111011000", "10111000110", "10001110110", "11101110110", "11010001110", "11000101110", "11011101000", "11011100010", "11011101110", "11101011000", "11101000110", "11100010110", "11101101000", "11101100010", "11100011010", "11101111010", "11001000010", "11110001010", "10100110000", "10100001100", "10010110000", "10010000110", "10000101100", "10000100110", "10110010000", "10110000100", "10011010000", "10011000010", "10000110100", "10000110010", "11000010010", "11001010000", "11110111010", "11000010100", "10001111010", "10100111100", "10010111100", "10010011110", "10111100100", "10011110100", "10011110010", "11110100100", "11110010100", "11110010010", "11011011110", "11011110110", "11110110110", "10101111000", "10100011110", "10001011110", "10111101000", "10111100010", "11110101000", "11110100010", "10111011110", "10111101110", "11101011110", "11110101110", "11010000100", "11010010000", "11010011100", "1100011101011"];
+function barkodMetni(t) {
+  const map = { "ç": "c", "ğ": "g", "ı": "i", "ö": "o", "ş": "s", "ü": "u", "Ç": "C", "Ğ": "G", "İ": "I", "Ö": "O", "Ş": "S", "Ü": "U" };
+  return String(t).replace(/[çğıöşüÇĞİÖŞÜ]/g, c => map[c]).replace(/[^\x20-\x7E]/g, "?");
+}
+function code128B(text) {
+  const t = barkodMetni(text);
+  if (!t) return "";
+  const n = t.length, out = []; let cur = null, start = 0, i = 0;
+  const dig = k => { let j = k; while (j < n && t[j] >= "0" && t[j] <= "9") j++; return j - k; };
+  const toB = () => { if (cur === null) { start = 104; cur = "B"; } else if (cur === "C") { out.push(100); cur = "B"; } };
+  const toC = () => { if (cur === null) { start = 105; cur = "C"; } else if (cur === "B") { out.push(99); cur = "C"; } };
+  while (i < n) {
+    const run = dig(i);
+    if (run >= 4) {
+      let k = i;
+      if (run % 2) { toB(); out.push(t.charCodeAt(k) - 32); k++; }
+      toC();
+      for (; k < i + run; k += 2) out.push(parseInt(t.slice(k, k + 2), 10));
+      i += run;
+    } else { toB(); out.push(t.charCodeAt(i) - 32); i++; }
+  }
+  let sum = start;
+  out.forEach((v, idx) => { sum += v * (idx + 1); });
+  return C128[start] + out.map(v => C128[v]).join("") + C128[sum % 103] + C128[106];
+}
+function barcodeSvg(text, heightMm, maxWidthMm) {
+  const bits = code128B(text);
+  if (!bits) return "";
+  const quiet = 10, total = bits.length + quiet * 2;
+  const mod = Math.round(Math.min(0.5, maxWidthMm / total) * 1000) / 1000;
+  let rects = "", i = 0;
+  while (i < bits.length) {
+    if (bits[i] === "1") {
+      let j = i; while (bits[j] === "1") j++;
+      rects += `<rect x="${((quiet + i) * mod).toFixed(3)}" y="0" width="${((j - i) * mod).toFixed(3)}" height="${heightMm}"/>`;
+      i = j;
+    } else i++;
+  }
+  const W = (total * mod).toFixed(3);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${heightMm}" width="${W}mm" height="${heightMm}mm" shape-rendering="crispEdges" fill="#000">${rects}</svg>`;
+}
+
+const etk = { tur: "stok", kod: "", acik: "", raf: "", adet: "", lot: "", tarih: new Date().toLocaleDateString("tr-TR"), uretim: new Date().toLocaleDateString("tr-TR"), sevk: "", kopya: 1, auto: "" };
+let etkStok = [];
+const ggaayy = t => { const m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(String(t || "").trim()); return m ? m[1].padStart(2, "0") + m[2].padStart(2, "0") + m[3].slice(2) : "000000"; };
+function yeniSeri() {
+  const a = new Uint32Array(2);
+  if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(a); else { a[0] = Math.random() * 4294967296; a[1] = Math.random() * 4294967296; }
+  return String((a[0] % 1e6) * 1e6 + (a[1] % 1e6)).padStart(12, "0");
+}
+function urunBarkodMetni(seri) {
+  const kod = String(etk.kod || "").trim(), adet = parseInt(etk.adet, 10);
+  if (!kod) return "";
+  if (!(adet > 0 && adet <= 999999)) return kod;
+  return "UF" + (seri || "000000000000") + String(adet).padStart(6, "0") + ggaayy(etk.uretim) + ggaayy(etk.sevk) + kod;
+}
+function urunEtiketHtml(seri) {
+  const e = etk, kod = String(e.kod || "").trim(), bm = urunBarkodMetni(seri);
+  const fs = Math.min(9, Math.max(4.5, Math.floor(830 / Math.max(1, kod.length)) / 10));
+  return `<div class="etiket e-urun">
+    <div class="u-ust"><span class="u-marka">VESTON</span><span class="u-kod" style="font-size:${fs}mm">${esc(kod) || "—"}</span></div>
+    <div class="u-satir"><span>ÜRETİM TARİHİ</span><b>${esc(e.uretim) || "—"}</b></div>
+    <div class="u-satir"><span>SEVK TARİHİ</span><b>${esc(e.sevk) || "—"}</b></div>
+    <div class="u-adet">${esc(e.adet) || "—"} ADET</div>
+    <div class="e-bar" style="margin-top:auto">${bm ? barcodeSvg(bm, 14, 90) : ""}</div>
+  </div>`;
+}
+function etiketHtml(seri) {
+  if (etk.tur === "urun") return urunEtiketHtml(seri);
+  const e = etk, kod = String(e.kod || "").trim();
+  const fs = kod.length <= 9 ? 12 : Math.max(6, Math.floor(920 / (kod.length * 6.2)) / 10);
+  return `<div class="etiket">
+    <div class="e-kod" style="font-size:${fs}mm">${esc(kod) || "—"}</div>
+    <div class="e-acik">${esc(e.acik)}</div>
+    <div class="e-raf"><span class="e-rl">RAF</span><span class="e-rv">${esc(e.raf) || "—"}</span></div>
+    <div class="e-bar">${kod ? barcodeSvg(kod, 15, 90) : ""}</div>
+    <div class="e-bt">${esc(kod)}</div>
+    <div class="e-foot"><span>Adet: <b>${esc(e.adet) || "—"}</b></span><span>Lot: <b>${esc(e.lot) || "—"}</b></span><span>Tarih: <b>${esc(e.tarih)}</b></span></div>
+  </div>`;
+}
+async function renderEtiket() {
+  etkStok = await loadRecords("stok", "stokTakip");
+  const inp = (id, lbl, val, extra = "") => `<label class="term-lbl">${lbl}</label><input id="${id}" class="term-input" style="font-size:16px;padding:10px" value="${esc(val)}" autocomplete="off" ${extra} />`;
+  return `<div class="etk-wrap"><div>
+    <datalist id="et-list">${[...new Map(etkStok.map(r => [foldKod(r.malzemeKodu), r])).values()].map(r => `<option value="${esc(r.malzemeKodu)}">${esc(r.aciklama)}</option>`).join("")}</datalist>
+    <label class="term-lbl">Etiket türü</label><select id="et-tur" class="term-input" style="font-size:16px;padding:10px"><option value="stok" ${etk.tur === "stok" ? "selected" : ""}>Stok / raf etiketi</option><option value="urun" ${etk.tur === "urun" ? "selected" : ""}>Ürün etiketi (üretim / sevk tarihli)</option></select>
+    ${inp("et-kod", "Malzeme Kodu (barkoda yazılır)", etk.kod, 'list="et-list"')}
+    ${etk.tur === "urun"
+      ? `${inp("et-adet", "Adet (barkoda da yazılır)", etk.adet)}${inp("et-uretim", "Üretim tarihi (gg.aa.yyyy)", etk.uretim)}${inp("et-sevk", "Sevk tarihi (gg.aa.yyyy)", etk.sevk)}`
+      : `${inp("et-acik", "Açıklama", etk.acik)}${inp("et-raf", "Raf / Lokasyon", etk.raf)}${inp("et-adet", "Adet (isteğe bağlı)", etk.adet)}${inp("et-lot", "Lot (isteğe bağlı)", etk.lot)}${inp("et-tarih", "Tarih", etk.tarih)}`}
+    ${inp("et-kopya", "Kopya sayısı", etk.kopya, 'type="number" min="1" max="200"')}
+    <button id="et-yaz" class="term-confirm" style="background:#0B5ED7">🖨 Yazdır</button>
+    <div id="etk-msg" class="term-sub" style="margin-top:8px"></div>
+    <div class="term-sub" style="margin-top:8px">Yazdır penceresinde yazıcı olarak Zebra ZM400'ü seçin; kağıt boyutu 100x70 mm, kenar boşluğu "Yok", ölçek %100 olsun, üstbilgi/altbilgi kapalı olsun.</div>
+  </div><div><div class="erp-ptitle" style="border-radius:6px 6px 0 0">Önizleme (100 x 70 mm)</div><div class="etk-prev" id="etk-preview">${etiketHtml()}</div></div></div>`;
+}
+function attachEtiketEvents() {
+  const g = id => document.getElementById(id);
+  const upd = () => { g("etk-preview").innerHTML = etiketHtml(); const k = String(etk.kod || ""); g("etk-msg").textContent = barkodMetni(k) !== k ? "Barkoda Türkçe karakterler ASCII karşılığıyla yazılır (ör. ş → s)." : ""; };
+  [["et-acik", "acik"], ["et-raf", "raf"], ["et-adet", "adet"], ["et-lot", "lot"], ["et-tarih", "tarih"], ["et-uretim", "uretim"], ["et-sevk", "sevk"], ["et-kopya", "kopya"]].forEach(([id, key]) => { const el = g(id); if (el) el.addEventListener("input", () => { etk[key] = el.value; upd(); }); });
+  g("et-tur").addEventListener("change", () => { etk.tur = g("et-tur").value; render(); });
+  g("et-kod").addEventListener("input", () => {
+    etk.kod = g("et-kod").value;
+    const nz = v => String(v || "").trim().toLocaleLowerCase("tr");
+    const r = etkStok.find(x => nz(x.malzemeKodu) === nz(etk.kod));
+    if (r && g("et-acik") && (!g("et-acik").value || g("et-acik").value === etk.auto)) { g("et-acik").value = r.aciklama || ""; etk.acik = r.aciklama || ""; etk.auto = etk.acik; }
+    upd();
+  });
+  g("et-yaz").addEventListener("click", () => {
+    if (!String(etk.kod || "").trim()) { g("etk-msg").textContent = "Önce malzeme kodunu girin."; return; }
+    const n = Math.max(1, Math.min(200, parseInt(etk.kopya, 10) || 1));
+    let pa = document.getElementById("print-area");
+    if (!pa) { pa = document.createElement("div"); pa.id = "print-area"; document.body.appendChild(pa); }
+    pa.innerHTML = Array.from({ length: n }, () => etiketHtml(yeniSeri())).join("");
+    window.addEventListener("afterprint", () => { pa.innerHTML = ""; }, { once: true });
+    window.print();
+  });
+}
+
+/* =========================================================================
+   KAMERA İLE BARKOD OKUMA (telefon) — önce tarayıcının kendi okuyucusu, yoksa ZXing
+   ========================================================================= */
+const isCoarse = () => !!(window.matchMedia && matchMedia("(pointer: coarse)").matches);
+const hwMode = () => { try { return localStorage.getItem("erp_hw") === "1"; } catch (e) { return false; } };
+const ZX_URL = "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";
+const ZX_SRI = "sha384-BzBxP10ZE72aitqj5UMmUsbKFliP/DZqA8Wq+BNNhlIJDGoEd1tpkMYXOg9+n6sB";
+let camState = null;
+function zxLoad() {
+  if (window.ZXing) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const sc = document.createElement("script");
+    sc.src = ZX_URL; sc.integrity = ZX_SRI; sc.crossOrigin = "anonymous";
+    sc.onload = () => res();
+    sc.onerror = () => rej(new Error("Okuma kütüphanesi yüklenemedi (internet bağlantısını kontrol edin)"));
+    document.head.appendChild(sc);
+  });
+}
+function camClose() {
+  if (!camState) return;
+  const c = camState; camState = null;
+  c.stopped = true; clearInterval(c.timer);
+  try { if (c.reader) c.reader.reset(); } catch (e) {}
+  try { if (c.stream) c.stream.getTracks().forEach(t => t.stop()); } catch (e) {}
+  if (c.el) c.el.remove();
+}
+async function nativeTara(BS) {
+  const fail = (msg) => { term.msg = msg; term.kind = "err"; termFeedback(false); refreshTerminal(); };
+  try {
+    try {
+      if (!(await BS.isGoogleBarcodeScannerModuleAvailable()).available) {
+        term.msg = "Barkod okuyucu bileşeni telefona indiriliyor, birkaç saniye bekleyin…"; term.kind = "warn"; refreshTerminal();
+        await BS.installGoogleBarcodeScannerModule();
+        for (let i = 0; i < 40; i++) { await new Promise(r => setTimeout(r, 1000)); if ((await BS.isGoogleBarcodeScannerModuleAvailable()).available) break; }
+      }
+    } catch (e) { /* bileşen denetimi başarısızsa doğrudan okumayı dene */ }
+    const res = await BS.scan({ formats: ["CODE_128", "QR_CODE", "EAN_13", "EAN_8", "CODE_39"] });
+    const text = res && res.barcodes && res.barcodes[0] && res.barcodes[0].rawValue;
+    if (!text) return;
+    if (barkodSuphe(text)) return fail("Barkod eksik okundu. Barkodun tamamı çerçevede olsun, tekrar okutun.");
+    termFeedback(true);
+    const scan = document.getElementById("term-scan"); if (scan) scan.value = text;
+    termLookup(String(text).trim());
+  } catch (e) {
+    if (/cancel|iptal/i.test(String((e && (e.message || e.code)) || e))) return;
+    fail("Barkod okuyucu açılamadı: " + ((e && e.message) || e));
+  }
+}
+function camHata(e, stage, durum) {
+  const n = String((e && e.name) || ""), m = String((e && e.message) || "");
+  const teknik = ` [${stage}: ${n}${m ? " — " + m : ""}${durum ? "; tarayıcı kamera izni: " + durum : ""}]`;
+  if (/NotReadable|AbortError|TrackStart/i.test(n + m)) return "Kamera açılamadı: başka bir uygulama kamerayı kullanıyor olabilir. Diğer kamera ve video uygulamalarını kapatıp tekrar deneyin." + teknik;
+  if (/NotFound|Overconstrained/i.test(n)) return "Bu cihazda uygun kamera bulunamadı." + teknik;
+  if (/NotAllowed|Permission|Security/i.test(n + m)) {
+    if (stage === "video") return "Kamera açıldı ama görüntü başlatılamadı. Sayfayı yenileyip tekrar deneyin." + teknik;
+    return (durum === "granted"
+      ? "Tarayıcıda izin açık görünüyor ama kamera yine de engellendi. Telefonun sistem ayarlarında Chrome'a kamera izni verildiğini ve başka uygulamanın kamerayı kullanmadığını kontrol edin. Olmazsa \"Barkodu fotoğraf çekerek oku\" düğmesini kullanın."
+      : "Kamera izni verilmedi. Tarayıcı ayarlarından bu site için kameraya izin verin. Olmazsa \"Barkodu fotoğraf çekerek oku\" düğmesini kullanın.") + teknik;
+  }
+  return "Kamera açılamadı." + teknik;
+}
+async function camOpen() {
+  if (camState) return;
+  const fail = (msg) => { term.msg = msg; term.kind = "err"; termFeedback(false); refreshTerminal(); };
+  const BS = window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform() && Capacitor.Plugins && Capacitor.Plugins.BarcodeScanner;
+  if (BS) return nativeTara(BS);   // Android uygulamasındaysa telefonun yerel barkod okuyucusu (kamera izni gerekmez)
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return fail("Kamera yalnızca güvenli (https) bir adreste çalışır.");
+  const el = document.createElement("div");
+  el.id = "cam-overlay";
+  el.style.cssText = "position:fixed;inset:0;z-index:10000;background:#000;display:flex;flex-direction:column";
+  el.innerHTML = `<div style="position:relative;flex:1;min-height:0">
+      <video id="cam-video" playsinline muted autoplay style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
+      <div id="cam-hint" style="position:absolute;left:0;right:0;top:12px;text-align:center;color:#fff;font:600 15px Arial;text-shadow:0 1px 3px #000">Barkodu çerçeveye getirin</div>
+      <div style="position:absolute;left:8%;right:8%;top:35%;height:30%;border:3px solid rgba(255,255,255,.85);border-radius:12px;pointer-events:none"></div></div>
+    <div style="display:flex;gap:10px;padding:12px;background:#111">
+      <button id="cam-torch" style="display:none;flex:1;padding:14px;font-size:16px;border-radius:10px;border:none">💡 Işık</button>
+      <button id="cam-close" style="flex:1;padding:14px;font-size:16px;font-weight:700;border-radius:10px;border:none;background:#C0392B;color:#fff">Kapat</button></div>`;
+  document.body.appendChild(el);
+  const c = camState = { el, stopped: false };
+  const video = el.querySelector("#cam-video"), hint = el.querySelector("#cam-hint");
+  el.querySelector("#cam-close").addEventListener("click", camClose);
+  const onCode = (text) => {
+    if (c.stopped || !text) return;
+    if (barkodSuphe(text)) { hint.textContent = "Barkod eksik okundu, tekrar deneniyor… biraz uzaklaşıp barkodun tamamını çerçeveye alın"; return; }
+    termFeedback(true); camClose();
+    const scan = document.getElementById("term-scan"); if (scan) scan.value = text;
+    termLookup(String(text).trim());
+  };
+  let stage = "başlangıç";
+  try {
+    let native = false;
+    if ("BarcodeDetector" in window) {
+      try {
+        stage = "okuyucu kontrolü";
+        const sup = await BarcodeDetector.getSupportedFormats();
+        const want = ["code_128", "qr_code", "ean_13", "ean_8", "code_39"].filter(f => sup.includes(f));
+        if (want.includes("code_128")) {
+          stage = "kamera açma";
+          let stream;
+          try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false }); }
+          catch (e1) { if (/Overconstrained|TypeError/i.test(String(e1.name))) stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false }); else throw e1; }
+          if (c.stopped) { stream.getTracks().forEach(t => t.stop()); return; }
+          stage = "video"; c.stream = stream; video.srcObject = stream; await video.play();
+          const det = new BarcodeDetector({ formats: want });
+          c.timer = setInterval(async () => {
+            if (c.stopped || c.busy) return;
+            c.busy = true;
+            try { const r = await det.detect(video); if (r.length) onCode(r[0].rawValue); } catch (e) {}
+            c.busy = false;
+          }, 200);
+          native = true;
+          const tr = stream.getVideoTracks && stream.getVideoTracks()[0];
+          if (tr && tr.getCapabilities && (tr.getCapabilities() || {}).torch) {
+            const tb = el.querySelector("#cam-torch"); let on = false; tb.style.display = "block";
+            tb.addEventListener("click", async () => { on = !on; try { await tr.applyConstraints({ advanced: [{ torch: on }] }); } catch (e) {} });
+          }
+        }
+      } catch (e) {
+        if (c.stream) { c.stream.getTracks().forEach(t => t.stop()); c.stream = null; }
+        if (/NotAllowed|Permission/i.test(e.name + e.message)) throw e;
+      }
+    }
+    if (!native) {
+      hint.textContent = "Okuyucu yükleniyor…";
+      stage = "yedek okuyucu yükleme";
+      await zxLoad();
+      if (c.stopped) return;
+      const hints = new Map();
+      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.QR_CODE, ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8, ZXing.BarcodeFormat.CODE_39]);
+      hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+      c.reader = new ZXing.BrowserMultiFormatReader(hints, 200);
+      hint.textContent = "Barkodu çerçeveye getirin";
+      stage = "yedek okuyucu";
+      await c.reader.decodeFromVideoDevice(null, video, (res) => { if (res) onCode(res.getText()); });
+    }
+  } catch (e) {
+    camClose();
+    let durum = "";
+    try { durum = (await navigator.permissions.query({ name: "camera" })).state; } catch (x) {}
+    fail(camHata(e, stage, durum));
+  }
+}
+
+/* =========================================================================
+   BARKODSUZ ETİKET: fotoğraftan yazı okuma (OCR, Tesseract.js) → kod, adet, tarihler
+   ========================================================================= */
+const TS_URL = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+const TS_SRI = "sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F";
+let tsWorker = null;
+function tsLoad() {
+  if (window.Tesseract) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const sc = document.createElement("script");
+    sc.src = TS_URL; sc.integrity = TS_SRI; sc.crossOrigin = "anonymous";
+    sc.onload = () => res();
+    sc.onerror = () => rej(new Error("Yazı okuyucu yüklenemedi (internet bağlantısını kontrol edin)"));
+    document.head.appendChild(sc);
+  });
+}
+function parseEtiketYazi(text) {
+  const t = String(text || "").replace(/\r/g, "");
+  const toDigit = x => x.replace(/[Oo]/g, "0").replace(/[Il|]/g, "1").replace(/S/g, "5").replace(/B/g, "8");
+  let kod = (/(?:^|\D)(\d{8})(?!\d)/.exec(t) || [])[1];
+  if (!kod) {
+    const cand = (t.match(/[0-9OoIl|SB]{8}/g) || []).filter(x => (x.match(/\d/g) || []).length >= 6).map(toDigit);
+    kod = cand.find(x => /^\d{8}$/.test(x));
+  }
+  const dd = m => `${m[1].padStart(2, "0")}${m[2].padStart(2, "0")}${m[3].slice(2)}`;
+  const re = /(\d{1,2})[.,](\d{1,2})[.,](20\d{2})/;
+  let uretim = "", sevk = "";
+  const all = [];
+  t.split("\n").forEach(line => {
+    const m = re.exec(line); if (!m) return;
+    all.push(dd(m));
+    if (/SEVK/i.test(line)) sevk = dd(m); else if (/URET|ÜRET/i.test(line)) uretim = dd(m);
+  });
+  if (!uretim && !sevk) { uretim = all[0] || ""; sevk = all[1] || ""; }
+  else if (!uretim) uretim = all.find(d => d !== sevk) || "";
+  else if (!sevk) sevk = all.find(d => d !== uretim) || "";
+  const am = /(\d{1,6})\s*A[DO0]ET/i.exec(t);
+  const adet = am ? parseInt(am[1], 10) : 0;
+  if (!kod || !(adet > 0)) return null;
+  return { kod, adet, uretim: uretim || "000000", sevk: sevk || "000000" };
+}
+async function ocrPrepare(file) {
+  try {
+    const url = URL.createObjectURL(file);
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; setTimeout(() => rej(new Error("zaman aşımı")), 8000); i.src = url; });
+    const sc = 1800 / Math.max(img.width, img.height);
+    const cv = document.createElement("canvas");
+    cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+    const ctx = cv.getContext("2d"); if (!ctx) throw new Error("canvas yok");
+    ctx.drawImage(img, 0, 0, cv.width, cv.height);
+    const d = ctx.getImageData(0, 0, cv.width, cv.height), px = d.data, hist = new Array(256).fill(0);
+    for (let i = 0; i < px.length; i += 4) { const g = (px[i] * 0.299 + px[i + 1] * 0.587 + px[i + 2] * 0.114) | 0; px[i] = g; hist[g]++; }
+    const n = px.length / 4; let acc = 0, lo = 0, hi = 255;
+    for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc > n * 0.01) { lo = v; break; } }
+    acc = 0; for (let v = 255; v >= 0; v--) { acc += hist[v]; if (acc > n * 0.01) { hi = v; break; } }
+    const k = 255 / Math.max(1, hi - lo);
+    for (let i = 0; i < px.length; i += 4) { const g = Math.max(0, Math.min(255, (px[i] - lo) * k)); px[i] = px[i + 1] = px[i + 2] = g; }
+    ctx.putImageData(d, 0, 0);
+    URL.revokeObjectURL(url);
+    return await new Promise(res => cv.toBlob(b => res(b || file), "image/png"));
+  } catch (e) { return file; }
+}
+async function ocrEtiket(file) {
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font:600 17px Arial;text-align:center;padding:20px";
+  box.innerHTML = "<div>🔤 Etiket okunuyor…<br><span style='font-weight:400;font-size:14px'>İlk seferde okuyucu indirileceği için 10-20 sn sürebilir.</span></div>";
+  document.body.appendChild(box);
+  const fail = (msg) => { term.msg = msg; term.kind = "err"; termFeedback(false); refreshTerminal(); };
+  try {
+    await tsLoad();
+    if (!tsWorker) tsWorker = await Tesseract.createWorker("eng");
+    const img = await ocrPrepare(file);
+    let r = parseEtiketYazi((await tsWorker.recognize(img)).data.text);
+    if (!r) {
+      await tsWorker.setParameters({ tessedit_pageseg_mode: "11" });
+      r = parseEtiketYazi((await tsWorker.recognize(img)).data.text);
+      await tsWorker.setParameters({ tessedit_pageseg_mode: "3" });
+    }
+    box.remove();
+    if (!r) return fail("Etiket okunamadı. Etiketi düz tutup yakından, aydınlık ve parlamasız çekin; yazının tamamı fotoğrafta olsun.");
+    term.ocrFlag = true;
+    termLookup("UE" + String(Math.min(999999, r.adet)).padStart(6, "0") + r.uretim + r.sevk + r.kod);
+  } catch (e) { box.remove(); fail("Etiket okunamadı: " + (e.message || e.name)); }
+}
+
+if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) { navigator.serviceWorker.register("sw.js").catch(() => {}); }
+/* =========================================================================
+   YETKİLER — sadece yetkili kullanıcı görür ve değiştirir
+   ========================================================================= */
+let yetkiRows = [];
+async function renderYetki() {
+  if (rolu() !== "admin") return `<div class="term-msg warn">Bu sayfa sadece yetkili kullanıcılar içindir.</div>`;
+  try { yetkiRows = await sbFetch("kullanici_rol?select=email,rol&order=email.asc"); }
+  catch (e) { return `<div class="term-msg err">Yetki listesi okunamadı: ${esc(e.message)}</div>`; }
+  const opts = cur => Object.entries(rolEtiket).map(([v, l]) => `<option value="${v}" ${cur === v ? "selected" : ""}>${l}</option>`).join("");
+  return `<div style="max-width:760px">
+    <div class="erp-panel"><div class="erp-ptitle">Kullanıcı Yetkileri <span>${yetkiRows.length} kullanıcı</span></div>
+      <div class="erp-scroll"><table class="erp-table"><thead><tr><th>E-posta</th><th>Yetki</th><th></th></tr></thead><tbody>
+      ${yetkiRows.map(r => `<tr><td>${esc(r.email)}</td><td><select data-rol-email="${esc(r.email)}">${opts(r.rol)}</select></td><td class="act"><button class="term-undo" data-rol-sil="${esc(r.email)}">Kaldır</button></td></tr>`).join("") || '<tr><td colspan="3" class="term-sub">Kayıt yok.</td></tr>'}
+      </tbody></table></div>
+      <div class="erp-filter"><input id="yt-mail" type="email" placeholder="Yeni kullanıcının e-postası" /><select id="yt-rol">${opts("okutucu")}</select><button class="term-undo" id="yt-ekle">Ekle</button></div>
+      <div id="yt-msg" class="term-sub" style="padding:8px 10px"></div></div>
+    <div class="term-sub" style="margin-top:10px;line-height:1.5"><b>Yetkili:</b> her şeyi yapar. <b>Okutucu:</b> giriş, çıkış ve sayım okutur; geri alma, silme, düzenleme ve durum değiştirme yapamaz. <b>İzleyici:</b> sadece görür. Listede olmayan kullanıcı "İzleyici" sayılır. Yeni kullanıcıyı önce Supabase'de (Authentication &gt; Users) oluşturun, sonra e-postasını buraya ekleyin.</div></div>`;
+}
+function attachYetkiEvents() {
+  const msg = t => { const m = document.getElementById("yt-msg"); if (m) m.textContent = t; };
+  const me = String((sbSession && sbSession.email) || "").toLowerCase();
+  const adminSay = () => yetkiRows.filter(r => r.rol === "admin").length;
+  const son = (email, yeniRol) => String(email).toLowerCase() === me && adminSay() <= 1 && yeniRol !== "admin";
+  const bitir = async (ok) => { if (ok) { await render(); } };
+  document.querySelectorAll("[data-rol-email]").forEach(sel => sel.addEventListener("change", async () => {
+    const email = sel.getAttribute("data-rol-email");
+    if (son(email, sel.value)) { msg("Son yetkili kullanıcının yetkisi düşürülemez."); sel.value = "admin"; return; }
+    try { await sbFetch("kullanici_rol?email=eq." + encodeURIComponent(email), { method: "PATCH", headers: { Prefer: "return=minimal" }, body: { rol: sel.value } }); await bitir(true); }
+    catch (e) { msg("Kaydedilemedi: " + e.message); }
+  }));
+  document.querySelectorAll("[data-rol-sil]").forEach(b => b.addEventListener("click", async () => {
+    const email = b.getAttribute("data-rol-sil");
+    if (son(email, "")) { msg("Son yetkili kullanıcı kaldırılamaz."); return; }
+    try { await sbFetch("kullanici_rol?email=eq." + encodeURIComponent(email), { method: "DELETE", headers: { Prefer: "return=minimal" } }); await bitir(true); }
+    catch (e) { msg("Kaldırılamadı: " + e.message); }
+  }));
+  const ek = document.getElementById("yt-ekle");
+  if (ek) ek.addEventListener("click", async () => {
+    const email = document.getElementById("yt-mail").value.trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(email)) return msg("Geçerli bir e-posta yazın.");
+    try { await sbFetch("kullanici_rol?on_conflict=email", { method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" }, body: { email, rol: document.getElementById("yt-rol").value } }); await bitir(true); }
+    catch (e) { msg("Eklenemedi: " + e.message); }
+  });
+}
+
+async function barkodFoto(file) {
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font:600 17px Arial;text-align:center;padding:20px";
+  box.textContent = "Barkod aranıyor…";
+  document.body.appendChild(box);
+  const fail = (msg) => { term.msg = msg; term.kind = "err"; termFeedback(false); refreshTerminal(); };
+  const yukle = (url) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; setTimeout(() => rej(new Error("zaman aşımı")), 10000); i.src = url; });
+  let url = "";
+  try {
+    url = URL.createObjectURL(file);
+    const img = await yukle(url);
+    let src = img, kucuk = img;
+    try {
+      const sc = Math.min(1, 2200 / Math.max(img.width, img.height));
+      const cv = document.createElement("canvas"); cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+      cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+      src = cv; kucuk = await yukle(cv.toDataURL("image/jpeg", 0.92));
+    } catch (e) { src = img; kucuk = img; }
+    let text = "";
+    if ("BarcodeDetector" in window) {
+      try {
+        const sup = await BarcodeDetector.getSupportedFormats();
+        const want = ["code_128", "qr_code", "ean_13", "ean_8", "code_39"].filter(f => sup.includes(f));
+        const r = await new BarcodeDetector({ formats: want }).detect(src);
+        if (r.length && !barkodSuphe(r[0].rawValue)) text = r[0].rawValue;
+      } catch (e) {}
+    }
+    if (!text) {
+      await zxLoad();
+      const hints = new Map();
+      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.QR_CODE, ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8, ZXing.BarcodeFormat.CODE_39]);
+      hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+      text = (await new ZXing.BrowserMultiFormatReader(hints).decodeFromImageElement(kucuk)).getText();
+    }
+    box.remove(); URL.revokeObjectURL(url);
+    if (!text) return fail("Fotoğrafta barkod bulunamadı.");
+    if (barkodSuphe(text)) return fail("Barkod eksik ya da yanlış okundu. Barkodun tamamı fotoğrafta, düz ve net olsun, parlama olmasın; tekrar çekin.");
+    termFeedback(true);
+    termLookup(String(text).trim());
+  } catch (e) {
+    box.remove();
+    fail("Fotoğraftan barkod okunamadı. Barkodu yakından, düz ve net çekin; barkodun tamamı fotoğrafta olsun, parlama olmasın.");
+  }
+}
+
+async function kameraTesti() {
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;inset:0;z-index:10000;background:#fff;display:flex;flex-direction:column;font-family:Arial,sans-serif";
+  box.innerHTML = `<div style="padding:14px 16px;font-weight:700;font-size:17px;border-bottom:1px solid #D5DBE3">🔧 Kamera testi</div>
+    <pre id="kt-out" style="flex:1;margin:0;padding:14px 16px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:13px/1.5 monospace">Test yapılıyor… Kamera izni isterse "İzin ver" deyin.</pre>
+    <div style="display:flex;gap:10px;padding:12px;border-top:1px solid #D5DBE3">
+      <button id="kt-kopya" style="flex:1;padding:14px;font-size:16px;border-radius:10px;border:1px solid #CBD2DC;background:#fff">Kopyala</button>
+      <button id="kt-kapat" style="flex:1;padding:14px;font-size:16px;font-weight:700;border-radius:10px;border:none;background:#0B5ED7;color:#fff">Kapat</button></div>`;
+  document.body.appendChild(box);
+  box.querySelector("#kt-kapat").addEventListener("click", () => box.remove());
+  const out = box.querySelector("#kt-out"), sat = [];
+  const yaz = (k, v) => { sat.push(k + ": " + v); out.textContent = sat.join("\n") + "\n…"; };
+  box.querySelector("#kt-kopya").addEventListener("click", () => { try { navigator.clipboard.writeText(sat.join("\n")); } catch (e) {} });
+  const ua = navigator.userAgent || "";
+  yaz("Program sürümü", SURUM);
+  yaz("Uygulama türü", (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) ? "Android uygulaması (yerel barkod okuyucu var)" : "web sayfası");
+  yaz("Güvenli adres (https)", window.isSecureContext ? "evet" : "HAYIR");
+  yaz("Açılış şekli", ((window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone) ? "ana ekran uygulaması" : "tarayıcı sekmesi");
+  yaz("Tarayıcı bilgisi", ua);
+  yaz("Uygulama içi tarayıcı olabilir mi", /; wv\)|FBAN|FBAV|Instagram|WhatsApp|Telegram|Line\//i.test(ua) ? "EVET (olası sorun)" : "hayır");
+  const md = navigator.mediaDevices;
+  yaz("Kamera API'si (mediaDevices)", md && md.getUserMedia ? "var" : "YOK");
+  try { const pol = document.featurePolicy || document.permissionsPolicy; if (pol && pol.allowsFeature) yaz("Sayfada kameraya izin (permissions policy)", pol.allowsFeature("camera") ? "evet" : "HAYIR"); } catch (e) {}
+  yaz("Barkod okuyucu (BarcodeDetector)", "BarcodeDetector" in window ? "var" : "yok (yedek okuyucu kullanılır)");
+  try { yaz("Tarayıcı kamera izni", (await navigator.permissions.query({ name: "camera" })).state); } catch (e) { yaz("Tarayıcı kamera izni", "okunamadı (" + e.name + ")"); }
+  try {
+    const dv = (await md.enumerateDevices()).filter(d => d.kind === "videoinput");
+    yaz("Görülen kamera sayısı", dv.length + (dv.length && dv.every(d => !d.label) ? " (adlar gizli: izin henüz verilmemiş olabilir)" : ""));
+  } catch (e) { yaz("Kamera listesi", "hata " + e.name + ": " + e.message); }
+  const dene = async (ad, c) => {
+    try { const st = await md.getUserMedia(c); const tr = st.getVideoTracks()[0]; yaz(ad, "BAŞARILI (" + ((tr && tr.label) || "kamera") + ")"); st.getTracks().forEach(t => t.stop()); }
+    catch (e) { yaz(ad, "HATA " + e.name + (e.message ? " — " + e.message : "")); }
+  };
+  if (md && md.getUserMedia) {
+    await dene("Deneme 1 (basit kamera isteği)", { video: true, audio: false });
+    await dene("Deneme 2 (arka kamera)", { video: { facingMode: { ideal: "environment" } }, audio: false });
+  }
+  out.textContent = sat.join("\n") + "\n\nTest bitti. Bu ekranın görüntüsünü gönderin.";
+}
+
+if (window.__cloud) {
+  if (sbSession) cloudAfterLogin(); else cloudLoginScreen();
+  setInterval(() => {
+    const a = document.activeElement && document.activeElement.id;
+    if (sbSession && state.activeModule === "terminal" && !term.item && !term.undoId && !term.busy && a !== "f-skod" && a !== "f-hkod") refreshTerminal(true);
+  }, 30000);
+} else render();
+</script>
+</body>
+</html>
