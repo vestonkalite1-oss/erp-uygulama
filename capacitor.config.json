@@ -1,0 +1,13 @@
+{
+	"appId": "com.veston.erptakip",
+	"appName": "ERP Takip",
+	"webDir": "www",
+	"server": {
+		"url": "https://statuesque-granita-4b93d0.netlify.app",
+		"androidScheme": "https",
+		"allowNavigation": [
+			"statuesque-granita-4b93d0.netlify.app",
+			"*.supabase.co"
+		]
+	}
+}

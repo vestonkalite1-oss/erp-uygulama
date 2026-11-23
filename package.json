@@ -1,0 +1,24 @@
+{
+  "name": "erp-takip-masaustu",
+  "version": "1.0.0",
+  "description": "ERP Takip Programı masaüstü uygulaması",
+  "author": "Veston",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.veston.erptakip.masaustu",
+    "productName": "ERP Takip",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "offline.html", "icon.png"],
+    "win": { "target": "nsis", "icon": "build/icon.ico", "artifactName": "ERP-Takip-Kurulum.${ext}" },
+    "linux": { "target": "dir" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true, "createStartMenuShortcut": true }
+  }
+}
